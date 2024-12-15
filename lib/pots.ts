@@ -24,14 +24,11 @@ export class Pots {
     );
   }
 
-  async get(): Promise<Pot[]> {
-    return ((
-      await this.db.executeAsync(
-        `
-    SELECT * FROM ${tableName} WHERE ${table.deletedAt} IS NULL ORDER BY ${table.id} DESC;
-  `,
-      )
-    ).rows ?? []) as Pot[];
+  get(): Pot[] {
+    const {rows} = this.db.execute<any>(
+      `SELECT * FROM ${tableName} WHERE ${table.deletedAt} IS NULL ORDER BY ${table.id} DESC;`,
+    );
+    return Array.from(rows?._array ?? []) as Pot[];
   }
 
   static createTable = (db: NitroSQLiteConnection) => {

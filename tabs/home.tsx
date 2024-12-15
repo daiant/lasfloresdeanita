@@ -27,40 +27,27 @@ import { actions } from '../App';
 import { FloatingAction } from 'react-native-floating-action';
 import { database } from '../lib/db-service';
 
+const potService = new Pots(database);
 export default function Home({ navigation }: { navigation: any }) {
-  const [pots, setPots] = React.useState<Pot[]>([]);
-  const [potService, setPotService] = React.useState<Pots | undefined>();
+  const [pots, setPots] = React.useState<Pot[]>(potService.get());
   const isDarkMode = useColorScheme() === 'dark';
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
     flex: 1,
   };
 
-  const callback = React.useCallback(async () => {
-    setPotService(new Pots(database));
-    await createTables(database);
-  }, []);
-
-
   async function createNewPot(e: NativeSyntheticEvent<TextInputSubmitEditingEventData>) {
     if (!potService || !e.nativeEvent.text) { return; }
     console.log('Writing to pots', e.nativeEvent.text);
 
     potService.create(e.nativeEvent.text);
-    getPots();
+    setPots(potService.get());
   }
 
-  const getPots = React.useCallback(() => {
-    if (!potService) { return; }
-
-    potService.get().then(data => {
-      setPots(data);
-    }).catch(error => console.log(error));
-  }, [potService]);
-
   React.useEffect(() => {
-    callback().then(() => getPots());
-  }, [callback, getPots]);
+    createTables(database);
+    console.log(potService.get());
+  }, []);
 
   return (
     <SafeAreaView style={backgroundStyle}>
@@ -77,7 +64,7 @@ export default function Home({ navigation }: { navigation: any }) {
         <FlatList
           data={pots}
           renderItem={({ item }) => (
-            <Text onPress={() => navigation.navigate('Pot', { pot: item })} key={item.potId} style={{ color: Colors.white }}>
+            <Text onPress={() => navigation.navigate('Pot', { potId: item.potId, name: item.name })} key={item.potId} style={{ color: Colors.white }}>
               {item.name}
             </Text>
           )}

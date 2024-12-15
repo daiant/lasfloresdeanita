@@ -37,6 +37,7 @@ export type FlowerRequest = Pick<
 export class Flowers {
   constructor(readonly db: NitroSQLiteConnection) {}
   create(flower: FlowerRequest) {
+    console.log('Inserting flowereta');
     return this.db.execute(
       `
     INSERT INTO ${tableName} (
@@ -62,23 +63,26 @@ export class Flowers {
   }
 
   get(): Flower[] {
-    return (this.db.execute(`
-    SELECT * FROM ${tableName} WHERE ${table.deletedAt} IS NULL ORDER BY ${table.id} DESC;
-  `).rows ?? []) as Flower[];
+    const {rows} = this.db.execute<any>(
+      `SELECT * FROM ${tableName} WHERE ${table.deletedAt} IS NULL ORDER BY ${table.id} DESC;`,
+    );
+
+    return Array.from(rows?._array ?? []) as Flower[];
   }
 
-  getByPotId(potId: number): Flower[] {
-    return (this.db.execute(
-      `
-        SELECT *
+  getByPotId(potId: string): Flower[] {
+    const {rows} = this.db.execute<any>(
+      `SELECT *
         FROM ${tableName} 
         WHERE 
           ${table.deletedAt} IS NULL 
         AND ${table.potId} = ?
-        ORDER BY ${table.id} DESC;
-        `,
+        ORDER BY ${table.id} DESC;`,
       [potId],
-    ).rows ?? []) as Flower[];
+    );
+
+    console.log(rows);
+    return Array.from(rows?._array ?? []) as Flower[];
   }
 
   static createTable = async (db: NitroSQLiteConnection) => {

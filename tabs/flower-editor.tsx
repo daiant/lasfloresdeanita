@@ -4,19 +4,10 @@ import { Controller, ControllerRenderProps, useForm } from 'react-hook-form';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { FlowerRequest, Flowers } from '../lib/flowers';
 import { database } from '../lib/db-service';
+const flowerService = new Flowers(database);
 
 export default function FlowerEditor({ route, navigation }: { route: any, navigation: any }) {
   const [loading, setLoading] = React.useState(false);
-  const [flowerService, setflowerService] = React.useState<Flowers | undefined>();
-
-  const callback = React.useCallback(async () => {
-    setflowerService(new Flowers(database));
-  }, []);
-
-
-  React.useEffect(() => {
-    callback();
-  }, [callback]);
 
   const {
     control,
@@ -33,6 +24,7 @@ export default function FlowerEditor({ route, navigation }: { route: any, naviga
       quantity: 0,
     },
   });
+
   const onSubmit = async (flower: FlowerRequest) => {
     if (loading) { return; }
     if (!flowerService) { return; }
