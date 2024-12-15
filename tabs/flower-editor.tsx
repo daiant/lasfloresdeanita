@@ -5,12 +5,18 @@ import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { Flower, FlowerRequest, Flowers } from '../lib/flowers';
 import { database } from '../lib/db-service';
 import DocumentPicker from 'react-native-document-picker';
+import { Pot, Pots } from '../lib/pots';
+import { useFocusEffect } from '@react-navigation/native';
+import RNPickerSelect from 'react-native-picker-select';
+import { Theme } from './home';
 
 const flowerService = new Flowers(database);
+const potService = new Pots(database);
 
-export default function FlowerEditor({ route, navigation }: { route: { params: { flower: Flower | undefined, potId: number } }, navigation: any }) {
+export default function FlowerEditor({ route, navigation }: { route: { params?: { flower: Flower | undefined, potId: number } }, navigation: any }) {
+  const [pots, setPots] = React.useState<Pot[]>([]);
   const [loading, setLoading] = React.useState(false);
-  const [image, setImage] = React.useState(route.params.flower?.image ?? '');
+  const [image, setImage] = React.useState(route.params?.flower?.image ?? '');
 
   const {
     control,
@@ -19,15 +25,15 @@ export default function FlowerEditor({ route, navigation }: { route: { params: {
     formState: { errors },
   } = useForm({
     defaultValues: {
-      flowerId: route.params.flower?.flowerId,
-      name: route.params.flower?.name ?? '',
-      latinName: route.params.flower?.latinName ?? '',
-      description: route.params.flower?.description ?? '',
-      floration: route.params.flower?.floration ?? '',
-      germination: route.params.flower?.germination ?? '',
-      potId: route.params.flower?.potId ?? route.params.potId,
-      image: route.params.flower?.image ?? '',
-      quantity: route.params.flower?.quantity ?? 0,
+      flowerId: route.params?.flower?.flowerId,
+      name: route.params?.flower?.name ?? '',
+      latinName: route.params?.flower?.latinName ?? '',
+      description: route.params?.flower?.description ?? '',
+      floration: route.params?.flower?.floration ?? '',
+      germination: route.params?.flower?.germination ?? '',
+      potId: route.params?.flower?.potId ?? route.params?.potId,
+      image: route.params?.flower?.image ?? '',
+      quantity: route.params?.flower?.quantity ?? 0,
     },
   });
 
@@ -40,14 +46,19 @@ export default function FlowerEditor({ route, navigation }: { route: { params: {
       if (flower.flowerId) { flowerService.update(flower); }
       else { flowerService.create(flower); }
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
     setLoading(false);
     navigation.goBack();
   };
 
+  useFocusEffect(
+    React.useCallback(() => {
+      setPots(potService.get());
+    }, []));
+
   return <View style={{ backgroundColor: Colors.darker }}>
-    <Controller control={control} render={({ field }) => (<Input field={field} placeholder="Nombre" />)} name="name" />
+    <Controller rules={{ required: true }} control={control} render={({ field }) => (<Input field={field} placeholder="Nombre" />)} name="name" />
     {errors.name && <Text>This is required.</Text>}
 
     <Controller control={control} render={({ field }) => (<Input field={field} placeholder="Nombre 100tifiko" />)} name="latinName" />
@@ -61,6 +72,18 @@ export default function FlowerEditor({ route, navigation }: { route: { params: {
 
     <Controller control={control} render={({ field }) => (<Input field={field} placeholder="Germinación" />)} name="germination" />
     {errors.germination && <Text>This is required.</Text>}
+
+    <Text style={{ color: Theme.dark.text, fontSize: 14, marginInline: 6, marginBlockStart: 8 }}>Tarro</Text>
+    <Controller
+      name="potId"
+      control={control}
+      render={({ field }) => (<RNPickerSelect
+        onValueChange={e => field.onChange(e)}
+        items={pots.map(pot => ({ label: pot.name, value: pot.potId }))}
+        value={field.value}
+        onClose={field.onBlur}
+      />)}
+    />
 
     <Controller control={control} render={({ field }) => (<Input last keyboard="number-pad" field={field} placeholder="Cantidad de semillas" />)} name="quantity" />
     {errors.germination && <Text>This is required.</Text>}
@@ -77,7 +100,7 @@ export default function FlowerEditor({ route, navigation }: { route: { params: {
 
 
     <Button onPress={handleSubmit(onSubmit)} title="Guardar floreta" disabled={loading} />
-    {route.params.flower?.flowerId && <Button title="Borrar floreta :(" color="#fe0000" onPress={() => { flowerService.delete(route.params.flower?.flowerId); navigation.goBack(); }} />}
+    {route.params?.flower?.flowerId && <Button title="Borrar floreta :(" color="#fe0000" onPress={() => { flowerService.delete(route.params?.flower?.flowerId); navigation.goBack(); }} />}
   </View>;
 }
 

@@ -1,37 +1,13 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import Home from './tabs/home';
+import Home, { Theme } from './tabs/home';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Pot from './tabs/pot';
 import FlowerEditor from './tabs/flower-editor';
+import NewPot from './tabs/new-pot';
+import { StyleSheet } from 'react-native';
 
 const Stack = createNativeStackNavigator();
-export const actions = [
-  {
-    text: 'Accessibility',
-    // icon: require('./images/ic_accessibility_white.png'),
-    name: 'bt_accessibility',
-    position: 2,
-  },
-  {
-    text: 'Language',
-    // icon: require('./images/ic_language_white.png'),
-    name: 'bt_language',
-    position: 1,
-  },
-  {
-    text: 'Location',
-    // icon: require('./images/ic_room_white.png'),
-    name: 'bt_room',
-    position: 3,
-  },
-  {
-    text: 'Video',
-    // icon: require('./images/ic_videocam_white.png'),
-    name: 'bt_videocam',
-    position: 4,
-  },
-];
 
 function App(): React.JSX.Element {
   return (
@@ -40,14 +16,22 @@ function App(): React.JSX.Element {
         <Stack.Screen
           name="Home"
           component={Home}
-          options={{ title: 'Welcome' }}
+          options={{ headerShown: false }}
         />
-        <Stack.Screen name="Pot" component={Pot as any} />
-        <Stack.Screen name="Add Flower" component={FlowerEditor as any} />
-        <Stack.Screen name="Edit Flower" component={FlowerEditor as any} />
+        <Stack.Screen name="Pot" component={Pot as any} options={({ route }) => ({ ...headerOptions, title: (route.params as { name: string })?.name })} />
+        <Stack.Screen name="New Pot" component={NewPot as any} options={{ ...headerOptions, title: 'Nuevo Tarro' }} />
+        <Stack.Screen name="New Flower" component={FlowerEditor as any} options={headerOptions} />
+        <Stack.Screen name="Edit Flower" component={FlowerEditor as any} options={headerOptions} />
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
+const styles = StyleSheet.create({
+  header: {
+    backgroundColor: Theme.dark.base,
+  },
+});
+const headerOptions = { headerStyle: styles.header, headerTintColor: Theme.dark.text };
 
 export default App;
+

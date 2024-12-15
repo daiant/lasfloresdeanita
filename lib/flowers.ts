@@ -28,7 +28,7 @@ export type Flower = {
 
 export type FlowerRequest = {
   flowerId: number | undefined;
-  potId: number;
+  potId: number | undefined;
   name: string;
   latinName: string;
   description?: string;
