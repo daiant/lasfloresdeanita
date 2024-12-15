@@ -42,8 +42,9 @@ function App(): React.JSX.Element {
           component={Home}
           options={{ title: 'Welcome' }}
         />
-        <Stack.Screen name="Pot" component={Pot} />
-        <Stack.Screen name="Add Flower" component={FlowerEditor} />
+        <Stack.Screen name="Pot" component={Pot as any} />
+        <Stack.Screen name="Add Flower" component={FlowerEditor as any} />
+        <Stack.Screen name="Edit Flower" component={FlowerEditor as any} />
       </Stack.Navigator>
     </NavigationContainer>
   );

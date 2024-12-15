@@ -31,6 +31,16 @@ export class Pots {
     return Array.from(rows?._array ?? []) as Pot[];
   }
 
+  delete(potId?: number | string) {
+    if (!potId) {
+      return;
+    }
+    this.db.execute(
+      `UPDATE ${tableName} SET ${table.deletedAt} = date('now') WHERE ${table.id} = ?`,
+      [potId],
+    );
+  }
+
   static createTable = (db: NitroSQLiteConnection) => {
     const query = `CREATE TABLE IF NOT EXISTS ${tableName} (
     ${table.id} INTEGER PRIMARY KEY,

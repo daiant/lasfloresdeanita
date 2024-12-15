@@ -7,13 +7,12 @@
 
 import React from 'react';
 import {
+  Button,
   FlatList,
-  NativeSyntheticEvent,
   SafeAreaView,
   StatusBar,
   Text,
   TextInput,
-  TextInputSubmitEditingEventData,
   useColorScheme,
   View,
 } from 'react-native';
@@ -23,31 +22,29 @@ import {
 } from 'react-native/Libraries/NewAppScreen';
 import { createTables } from '../lib/db-service';
 import { Pot, Pots } from '../lib/pots';
-import { actions } from '../App';
-import { FloatingAction } from 'react-native-floating-action';
 import { database } from '../lib/db-service';
+import { useFocusEffect } from '@react-navigation/native';
 
 const potService = new Pots(database);
 export default function Home({ navigation }: { navigation: any }) {
-  const [pots, setPots] = React.useState<Pot[]>(potService.get());
+  const [pots, setPots] = React.useState<Pot[]>([]);
   const isDarkMode = useColorScheme() === 'dark';
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
     flex: 1,
   };
 
-  async function createNewPot(e: NativeSyntheticEvent<TextInputSubmitEditingEventData>) {
-    if (!potService || !e.nativeEvent.text) { return; }
-    console.log('Writing to pots', e.nativeEvent.text);
+  async function createNewPot(name: string) {
+    if (!potService || !name) { return; }
 
-    potService.create(e.nativeEvent.text);
+    potService.create(name);
     setPots(potService.get());
   }
 
-  React.useEffect(() => {
+  useFocusEffect(React.useCallback(() => {
     createTables(database);
-    console.log(potService.get());
-  }, []);
+    setPots(potService.get());
+  }, []));
 
   return (
     <SafeAreaView style={backgroundStyle}>
@@ -55,12 +52,12 @@ export default function Home({ navigation }: { navigation: any }) {
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
         backgroundColor={backgroundStyle.backgroundColor}
       />
-      <View>
+      <View style={{ marginBlockEnd: 'auto' }}>
         <Text
           style={titleStyles}>
           Hola anita!!!!!!
         </Text>
-        <TextInput placeholder="Afegir pot" onSubmitEditing={createNewPot} />
+        <DumbInput callback={createNewPot} />
         <FlatList
           data={pots}
           renderItem={({ item }) => (
@@ -70,9 +67,27 @@ export default function Home({ navigation }: { navigation: any }) {
           )}
         />
       </View>
-      <FloatingAction actions={actions} />
+      <Button title="Hellfire" onPress={() => {
+        database.execute('DELETE FROM flowers');
+        database.execute('DELETE FROM pots');
+        createTables(database);
+        setPots(potService.get());
+      }} />
     </SafeAreaView>
   );
+}
+
+export function DumbInput({ callback }: { callback: (name: string) => void }) {
+  const [value, setValue] = React.useState('');
+
+  return <TextInput
+    placeholder="Afegir pot"
+    onChange={e => setValue(e.nativeEvent.text)}
+    value={value}
+    onBlur={() => setValue('')}
+    onSubmitEditing={(e) => { callback(e.nativeEvent.text); setValue(''); }}
+    style={{ color: Colors.white }}
+  />;
 }
 
 const titleStyles = {
