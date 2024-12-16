@@ -1,5 +1,13 @@
 import React from 'react';
-import { Button, Image, KeyboardTypeOptions, Text, TextInput, View } from 'react-native';
+import {
+  KeyboardTypeOptions,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  useColorScheme,
+} from 'react-native';
 import { Controller, ControllerRenderProps, useForm } from 'react-hook-form';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { Flower, FlowerRequest, Flowers } from '../lib/flowers';
@@ -9,6 +17,9 @@ import { Pot, Pots } from '../lib/pots';
 import { useFocusEffect } from '@react-navigation/native';
 import RNPickerSelect from 'react-native-picker-select';
 import { Theme } from '../components/styles/theme';
+import ThemedText from '../components/text';
+import Button from '../components/button';
+import IconWithAction from '../components/icon-with-action';
 
 const flowerService = new Flowers(database);
 const potService = new Pots(database);
@@ -17,6 +28,12 @@ export default function FlowerEditor({ route, navigation }: { route: { params?: 
   const [pots, setPots] = React.useState<Pot[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [image, setImage] = React.useState(route.params?.flower?.image ?? '');
+  const isDarkMode = useColorScheme() === 'dark';
+
+  const backgroundStyle = {
+    backgroundColor: isDarkMode ? Theme.dark.base : Colors.lighter,
+    flex: 1,
+  };
 
   const {
     control,
@@ -57,53 +74,101 @@ export default function FlowerEditor({ route, navigation }: { route: { params?: 
       setPots(potService.get());
     }, []));
 
-  return <View style={{ backgroundColor: Colors.darker }}>
-    <Controller rules={{ required: true }} control={control} render={({ field }) => (<Input field={field} placeholder="Nombre" />)} name="name" />
-    {errors.name && <Text>This is required.</Text>}
+  const size = {
+    width: image ? 330 : 200,
+    height: image ? 96 : 96,
+  };
 
-    <Controller control={control} render={({ field }) => (<Input field={field} placeholder="Nombre 100tifiko" />)} name="latinName" />
-    {errors.latinName && <Text>This is required.</Text>}
+  return <View style={backgroundStyle}>
+    <ScrollView style={styles.section}>
+      <IconWithAction width={size.width} height={size.height} center source={image ? { uri: image } : require('../assets/flower-default.png')} text={'Subir foto de la flor'} action={() => {
+        // TODO: Check if cache is better than document;
+        DocumentPicker.pickSingle({ copyTo: 'cachesDirectory' }).then(data => {
+          setImage(data.fileCopyUri ?? '');
+          setValue('image', data.fileCopyUri ?? '');
+        }).catch(e => { console.log(e); });
+      }} />
 
-    <Controller control={control} render={({ field }) => (<Input field={field} placeholder="Descripción" />)} name="description" />
-    {errors.description && <Text>This is required.</Text>}
+      <Controller rules={{ required: true }} control={control} render={({ field }) => (<Input field={field} placeholder="Nombre" />)} name="name" />
+      {errors.name && <ThemedText>This is required.</ThemedText>}
 
-    <Controller control={control} render={({ field }) => (<Input field={field} placeholder="Floración" />)} name="floration" />
-    {errors.floration && <Text>This is required.</Text>}
+      <Controller control={control} render={({ field }) => (<Input field={field} placeholder="Nombre 100tifiko" />)} name="latinName" />
+      {errors.latinName && <ThemedText>This is required.</ThemedText>}
 
-    <Controller control={control} render={({ field }) => (<Input field={field} placeholder="Germinación" />)} name="germination" />
-    {errors.germination && <Text>This is required.</Text>}
+      <Controller control={control} render={({ field }) => (<Input field={field} placeholder="Descripción" />)} name="description" />
+      {errors.description && <ThemedText>This is required.</ThemedText>}
 
-    <Text style={{ color: Theme.dark.text, fontSize: 14, marginInline: 6, marginBlockStart: 8 }}>Tarro</Text>
-    <Controller
-      name="potId"
-      control={control}
-      render={({ field }) => (<RNPickerSelect
-        onValueChange={e => field.onChange(e)}
-        items={pots.map(pot => ({ label: pot.name, value: pot.potId }))}
-        value={field.value}
-        onClose={field.onBlur}
-      />)}
-    />
+      <Controller control={control} render={({ field }) => (<Input field={field} placeholder="Floración" />)} name="floration" />
+      {errors.floration && <ThemedText>This is required.</ThemedText>}
 
-    <Controller control={control} render={({ field }) => (<Input last keyboard="number-pad" field={field} placeholder="Cantidad de semillas" />)} name="quantity" />
-    {errors.germination && <Text>This is required.</Text>}
+      <Controller control={control} render={({ field }) => (<Input field={field} placeholder="Germinación" />)} name="germination" />
+      {errors.germination && <ThemedText>This is required.</ThemedText>}
 
-    <Button title="Subir ficheros" onPress={() => {
-      // TODO: Check if cache is better than document;
-      DocumentPicker.pickSingle({ copyTo: 'cachesDirectory' }).then(data => {
-        setImage(data.fileCopyUri ?? '');
-        setValue('image', data.fileCopyUri ?? '');
-      }).catch(e => { console.log(e); });
-    }} />
-    {image && <Image source={{ uri: image }} height={300} width={300} />}
+      <Text style={styles.label}>Tarro</Text>
+      <Controller
+        name="potId"
+        control={control}
+        render={({ field }) => (<RNPickerSelect
+          onValueChange={e => field.onChange(e)}
+          items={pots.map(pot => ({ label: pot.name, value: pot.potId }))}
+          value={field.value}
+          onClose={field.onBlur}
+        />)}
+      />
 
+      <Controller control={control} render={({ field }) => (<Input last keyboard="number-pad" field={field} placeholder="Cantidad de semillas" />)} name="quantity" />
+      {errors.germination && <ThemedText>This is required.</ThemedText>}
 
+      <Button
+        action={handleSubmit(onSubmit)}
+        title="Guardar floreta"
+        disabled={loading}
+      />
 
-    <Button onPress={handleSubmit(onSubmit)} title="Guardar floreta" disabled={loading} />
-    {route.params?.flower?.flowerId && <Button title="Borrar floreta :(" color="#fe0000" onPress={() => { flowerService.delete(route.params?.flower?.flowerId); navigation.goBack(); }} />}
+      {route.params?.flower?.flowerId && <Button
+        title="Borrar floreta :("
+        variant="danger"
+        action={() => {
+          flowerService.delete(route.params?.flower?.flowerId);
+          navigation.goBack();
+        }}
+      />}
+    </ScrollView>
   </View>;
 }
 
 function Input({ placeholder, field: { onBlur, onChange, value }, keyboard, last }: { last?: boolean, field: ControllerRenderProps<any, any>, placeholder: string, keyboard?: KeyboardTypeOptions }) {
-  return <TextInput style={{ color: Colors.white }} placeholder={placeholder} onBlur={onBlur} onChangeText={onChange} value={value} keyboardType={keyboard} returnKeyType={last ? 'default' : 'next'} submitBehavior={last ? 'blurAndSubmit' : 'submit'} />;
+  return <TextInput
+    style={styles.input}
+    placeholder={placeholder}
+    onBlur={onBlur}
+    onChangeText={onChange}
+    value={value}
+    keyboardType={keyboard}
+    returnKeyType={last ? 'default' : 'next'}
+    submitBehavior={last ? 'blurAndSubmit' : 'submit'}
+  />;
 }
+
+const styles = StyleSheet.create({
+  section: {
+    paddingInline: 16,
+    marginBlockEnd: 16,
+  },
+  label:
+  {
+    color: Theme.dark.text,
+    fontSize: 14,
+    marginInline: 6,
+    marginBlockStart: 8,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: Theme.dark.border,
+    borderRadius: 4,
+    marginBlock: 8,
+    lineHeight: 24,
+    color: Theme.dark.text,
+    textAlignVertical: 'top',
+  },
+});

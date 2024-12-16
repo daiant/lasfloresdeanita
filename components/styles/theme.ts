@@ -4,5 +4,6 @@ export const Theme = {
     text: '#cad3f5',
     border: '#363a4f',
     accent: '#c6a0f6',
+    red: '#ed8796',
   },
 };

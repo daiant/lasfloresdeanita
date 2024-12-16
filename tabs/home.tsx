@@ -8,13 +8,10 @@
 import React from 'react';
 import {
   FlatList,
-  Image,
   ImageBackground,
   SafeAreaView,
   StatusBar,
   StyleSheet,
-  Text,
-  TouchableHighlight,
   useColorScheme,
   View,
 } from 'react-native';
@@ -29,6 +26,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Flower, Flowers } from '../lib/flowers';
 import Title from '../components/title';
 import { Theme } from '../components/styles/theme';
+import IconWithAction from '../components/icon-with-action';
 
 
 
@@ -64,7 +62,7 @@ export default function Home({ navigation }: { navigation: any }) {
         <Title tag="h2">Tarros</Title>
         <FlatList
           data={pots}
-          contentContainerStyle={{ gap: 8 }}
+          contentContainerStyle={styles.list}
           horizontal
           ListFooterComponent={
             <IconWithAction center={!pots.length} source={require('../assets/zodiac.png')} text="Añade un tarro" action={() => navigation.navigate('New Pot')} />}
@@ -75,18 +73,18 @@ export default function Home({ navigation }: { navigation: any }) {
         <Title tag="h2">Flores</Title>
         <FlatList
           data={flowers}
-          contentContainerStyle={{ gap: 8 }}
+          contentContainerStyle={styles.list}
           horizontal
           ListFooterComponent={
             <IconWithAction center={!flowers.length} source={require('../assets/flower.png')} text="Añade una flor" action={() => navigation.navigate('New Flower')} />}
           renderItem={({ item }) => (
-            <IconWithAction source={{ uri: item.image }} action={() => navigation.navigate('Edit Flower', { potId: item.potId, flower: item })} text={item.name} />
+            <IconWithAction source={item.image ? { uri: item.image } : require('../assets/flower-default.png')} action={() => navigation.navigate('Edit Flower', { potId: item.potId, flower: item })} text={item.name} />
           )}
         />
       </View>
       {/* <Button title="Hellfire" onPress={() => {
-        database.execute('DELETE FROM flowers');
-        database.execute('DELETE FROM pots');
+        database.execute('DROP TABLE flowers');
+        database.execute('DROP TABLE pots');
         createTables(database);
         setPots(potService.get());
       }} /> */}
@@ -94,14 +92,6 @@ export default function Home({ navigation }: { navigation: any }) {
   );
 }
 
-export function IconWithAction({ source, text, action, center }: { source: any, text: string, action: () => void, center?: boolean }) {
-  return <View>
-    <TouchableHighlight onPress={action} underlayColor={'transparent'}>
-      <Image source={source} style={{ width: 64, height: 64, marginBlock: 8, marginInline: 'auto' }} resizeMode="contain" />
-    </TouchableHighlight>
-    <Text onPress={action} style={{ ...styles.text, fontSize: 15, textAlign: center ? 'center' : 'left', maxWidth: 125 }}>{text}</Text>
-  </View>
-}
 
 export const styles = StyleSheet.create({
   view: {
@@ -116,9 +106,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBlockEnd: 16,
   },
-  text: {
-    color: Theme.dark.text,
-    fontSize: 18,
-    lineHeight: 18,
-  },
+  list: {
+    gap: 8,
+  }
 });
