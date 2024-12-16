@@ -1,15 +1,16 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { StyleProp, StyleSheet, Text, TouchableOpacity, ViewStyle } from 'react-native';
 import { Theme } from './styles/theme';
 
 type Props = {
   disabled?: boolean;
   variant?: 'primary' | 'danger' | 'secondary';
   action: () => void,
-  title: string
+  title: string,
+  style?: StyleProp<ViewStyle>,
 }
 export default function Button(props: Props) {
-  return <TouchableOpacity disabled={props.disabled} onPress={props.action} activeOpacity={0.8}>
+  return <TouchableOpacity style={props.style} disabled={props.disabled} onPress={props.action} activeOpacity={0.8}>
     <Text style={{ ...styles.button, ...(styles as any)[props.variant ?? 'primary'] }}>{props.title}</Text>
   </TouchableOpacity>;
 }

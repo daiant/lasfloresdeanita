@@ -10,6 +10,7 @@ import {
   FlatList,
   ImageBackground,
   SafeAreaView,
+  ScrollView,
   StatusBar,
   StyleSheet,
   useColorScheme,
@@ -27,6 +28,8 @@ import { Flower, Flowers } from '../lib/flowers';
 import Title from '../components/title';
 import { Theme } from '../components/styles/theme';
 import IconWithAction from '../components/icon-with-action';
+import NFCReader from '../components/nfc-reader';
+import NFCWriter from '../components/nfc-writer';
 
 
 
@@ -81,6 +84,11 @@ export default function Home({ navigation }: { navigation: any }) {
             <IconWithAction source={item.image ? { uri: item.image } : require('../assets/flower-default.png')} action={() => navigation.navigate('Edit Flower', { potId: item.potId, flower: item })} text={item.name} />
           )}
         />
+        <Title tag="h2">Magias</Title>
+        <ScrollView horizontal style={{ marginBlockStart: 8 }}>
+          <NFCReader />
+          <NFCWriter />
+        </ScrollView>
       </View>
       {/* <Button title="Hellfire" onPress={() => {
         database.execute('DROP TABLE flowers');
