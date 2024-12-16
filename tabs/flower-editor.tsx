@@ -8,7 +8,7 @@ import DocumentPicker from 'react-native-document-picker';
 import { Pot, Pots } from '../lib/pots';
 import { useFocusEffect } from '@react-navigation/native';
 import RNPickerSelect from 'react-native-picker-select';
-import { Theme } from './home';
+import { Theme } from '../components/styles/theme';
 
 const flowerService = new Flowers(database);
 const potService = new Pots(database);

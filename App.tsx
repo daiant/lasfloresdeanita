@@ -1,11 +1,12 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import Home, { Theme } from './tabs/home';
+import Home from './tabs/home';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Pot from './tabs/pot';
 import FlowerEditor from './tabs/flower-editor';
 import NewPot from './tabs/new-pot';
 import { StyleSheet } from 'react-native';
+import { Theme } from './components/styles/theme';
 
 const Stack = createNativeStackNavigator();
 

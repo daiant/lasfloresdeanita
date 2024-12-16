@@ -27,15 +27,10 @@ import { Pot, Pots } from '../lib/pots';
 import { database } from '../lib/db-service';
 import { useFocusEffect } from '@react-navigation/native';
 import { Flower, Flowers } from '../lib/flowers';
+import Title from '../components/title';
+import { Theme } from '../components/styles/theme';
 
-export const Theme = {
-  dark: {
-    base: '#24273a',
-    text: '#cad3f5',
-    border: '#363a4f',
-    accent: '#c6a0f6',
-  },
-};
+
 
 const potService = new Pots(database);
 const flowerService = new Flowers(database);
@@ -63,10 +58,10 @@ export default function Home({ navigation }: { navigation: any }) {
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
       />
       <ImageBackground source={require('../assets/anita-wallpaper.webp')} style={styles.header}>
-        <Text style={styles.title}>Las flores de Anita</Text>
+        <Title tag="h1">Las flores de Anita</Title>
       </ImageBackground>
       <View style={styles.view}>
-        <Text style={styles.subtitle}>Tarros</Text>
+        <Title tag="h2">Tarros</Title>
         <FlatList
           data={pots}
           contentContainerStyle={{ gap: 8 }}
@@ -77,7 +72,7 @@ export default function Home({ navigation }: { navigation: any }) {
             <IconWithAction text={item.name} action={() => navigation.navigate('Pot', { potId: item.potId, name: item.name })} source={require('../assets/bottle.png')} />
           )}
         />
-        <Text style={styles.subtitle}>Flores</Text>
+        <Title tag="h2">Flores</Title>
         <FlatList
           data={flowers}
           contentContainerStyle={{ gap: 8 }}
@@ -120,22 +115,6 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBlockEnd: 16,
-  },
-  title: {
-    fontWeight: '700',
-    fontSize: 32,
-    color: Theme.dark.text,
-    marginBlockStart: 24,
-    marginBlockEnd: 8,
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 24,
-    fontWeight: 500,
-    color: Theme.dark.text,
-    marginBlock: 4,
-    borderBottomWidth: 2,
-    borderBottomColor: Theme.dark.border,
   },
   text: {
     color: Theme.dark.text,

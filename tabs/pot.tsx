@@ -4,8 +4,10 @@ import { Flower, Flowers } from '../lib/flowers';
 import { database } from '../lib/db-service';
 import { useFocusEffect } from '@react-navigation/native';
 import { Pots } from '../lib/pots';
-import { IconWithAction, Theme, styles } from './home';
+import { IconWithAction, styles } from './home';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
+import { Theme } from '../components/styles/theme';
+
 const flowerService = new Flowers(database);
 const potService = new Pots(database);
 

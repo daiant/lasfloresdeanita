@@ -1,9 +1,10 @@
 import React from 'react';
 import { View, Text, StatusBar, useColorScheme, SafeAreaView, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
-import { Theme, styles as baseStyles } from './home';
+import { styles as baseStyles } from './home';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { Pots } from '../lib/pots';
 import { database } from '../lib/db-service';
+import { Theme } from '../components/styles/theme';
 
 const potService = new Pots(database);
 export default function NewPot({ navigation }: { navigation: any, route: any }) {
