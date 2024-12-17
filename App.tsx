@@ -7,6 +7,7 @@ import FlowerEditor from './tabs/flower-editor';
 import NewPot from './tabs/new-pot';
 import { StyleSheet } from 'react-native';
 import { Theme } from './components/styles/theme';
+import Binnacle from './tabs/binnacle';
 
 const Stack = createNativeStackNavigator();
 
@@ -23,6 +24,7 @@ function App(): React.JSX.Element {
         <Stack.Screen name="New Pot" component={NewPot as any} options={{ ...headerOptions, title: 'Nuevo Tarro' }} />
         <Stack.Screen name="New Flower" component={FlowerEditor as any} options={headerOptions} />
         <Stack.Screen name="Edit Flower" component={FlowerEditor as any} options={headerOptions} />
+        <Stack.Screen name="Binnacle" component={Binnacle} options={{ ...headerOptions, title: 'Bitácora de la bruja' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

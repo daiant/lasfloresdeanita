@@ -7,6 +7,7 @@
 
 import React from 'react';
 import {
+  Button,
   FlatList,
   ImageBackground,
   SafeAreaView,
@@ -88,14 +89,16 @@ export default function Home({ navigation }: { navigation: any }) {
         <ScrollView horizontal style={{ marginBlockStart: 8 }}>
           <NFCReader />
           <NFCWriter />
+          <IconWithAction source={require('../assets/eye.png')} action={() => navigation.navigate('Binnacle')} text="Bitácora de la bruja" />
         </ScrollView>
       </View>
-      {/* <Button title="Hellfire" onPress={() => {
+      <Button title="Hellfire" onPress={() => {
         database.execute('DROP TABLE flowers');
         database.execute('DROP TABLE pots');
+        database.execute('DROP TABLE binnacles');
         createTables(database);
         setPots(potService.get());
-      }} /> */}
+      }} />
     </SafeAreaView>
   );
 }

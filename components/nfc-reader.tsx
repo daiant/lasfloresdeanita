@@ -1,6 +1,6 @@
 import React from 'react';
-import { Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import NfcManager, { NfcTech } from 'react-native-nfc-manager';
+import { Image, Modal, StyleSheet, Text, ToastAndroid, TouchableOpacity, View } from 'react-native';
+import NfcManager, { Ndef, NfcTech } from 'react-native-nfc-manager';
 import { Theme } from './styles/theme';
 import Title from './title';
 import Button from './button';
@@ -21,7 +21,11 @@ export default function NFCReader() {
       await NfcManager.requestTechnology(NfcTech.Ndef);
       // the resolved tag object will contain `ndefMessage` property
       const tag = await NfcManager.getTag();
-      console.warn(tag?.ndefMessage);
+      if (tag?.ndefMessage.at(0)?.payload?.length) {
+        console.log(tag.ndefMessage.map(msg => Ndef.decodeMessage(msg.payload)));
+      } else {
+        ToastAndroid.show('No hay hechizos en este pergamino', ToastAndroid.BOTTOM);
+      }
     } catch (ex) {
       console.warn(ex);
     } finally {
