@@ -3,6 +3,7 @@ import {NitroSQLiteConnection} from 'react-native-nitro-sqlite';
 const tableName = 'binnacles';
 const table = {
   id: 'binnacleId',
+  title: 'title',
   description: 'description',
   image: 'image',
   emoji: 'emoji',
@@ -12,6 +13,7 @@ const table = {
 
 export type Binnacle = {
   binnacleId: number;
+  title: string;
   emoji: string;
   image: string;
   description?: string;
@@ -21,12 +23,14 @@ export type Binnacle = {
 
 export class Binnacles {
   constructor(readonly db: NitroSQLiteConnection) {}
-  create(binnacle: Pick<Binnacle, 'image' | 'description' | 'emoji'>) {
+  create(
+    binnacle: Pick<Binnacle, 'title' | 'image' | 'description' | 'emoji'>,
+  ) {
     return this.db.execute(
       `
-    INSERT INTO ${tableName} (${table.description}, ${table.image}, ${table.emoji}) VALUES (?,?, ?)
+    INSERT INTO ${tableName} (${table.title}, ${table.description}, ${table.image}, ${table.emoji}) VALUES (?, ?, ?, ?)
   `,
-      [binnacle.description, binnacle.image, binnacle.emoji],
+      [binnacle.title, binnacle.description, binnacle.image, binnacle.emoji],
     );
   }
 
@@ -58,7 +62,8 @@ export class Binnacles {
   static createTable = (db: NitroSQLiteConnection) => {
     const query = `CREATE TABLE IF NOT EXISTS ${tableName} (
     ${table.id} INTEGER PRIMARY KEY,
-    ${table.description} TEXT NOT NULL,
+    ${table.title} TEXT,
+    ${table.description} TEXT,
     ${table.image} TEXT,
     ${table.emoji} TEXT,
     ${table.createdAt} timestamp DEFAULT current_timestamp NOT NULL,

@@ -12,7 +12,7 @@ import {
 import {FloatingAction} from 'react-native-floating-action';
 import {Theme} from '../components/styles/theme';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
-import {Binnacle as BinnacleType, Binnacles, format} from '../lib/binnacle';
+import {Binnacle as BinnacleType, Binnacles} from '../lib/binnacle';
 import {database} from '../lib/db-service';
 import {useFocusEffect} from '@react-navigation/native';
 import ThemedText from '../components/text';
@@ -64,7 +64,7 @@ export default function Binnacle({navigation}: {navigation: any}) {
                   navigation.navigate('Binnacle Detail', {id: item.binnacleId});
                 }}>
                 <ThemedText style={{fontSize: 18, fontWeight: 600}}>
-                  {format(item.createdAt as never)}
+                  {item.title}
                 </ThemedText>
               </TouchableHighlight>
               <TouchableHighlight
