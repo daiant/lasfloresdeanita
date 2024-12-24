@@ -1,15 +1,22 @@
 import React from 'react';
-import { View, StatusBar, useColorScheme, SafeAreaView, TextInput, StyleSheet, } from 'react-native';
-import { styles as baseStyles } from './home';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
-import { Pots } from '../lib/pots';
-import { database } from '../lib/db-service';
-import { Theme } from '../components/styles/theme';
+import {
+  View,
+  StatusBar,
+  useColorScheme,
+  SafeAreaView,
+  TextInput,
+  StyleSheet,
+} from 'react-native';
+import {styles as baseStyles} from './home';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
+import {Pots} from '../lib/pots';
+import {database} from '../lib/db-service';
+import {Theme} from '../components/styles/theme';
 import ThemedText from '../components/text';
 import Button from '../components/button';
 
 const potService = new Pots(database);
-export default function NewPot({ navigation }: { navigation: any, route: any }) {
+export default function NewPot({navigation}: {navigation: any; route: any}) {
   const [potName, setPotName] = React.useState('');
   const [potDescription, setPotDescription] = React.useState('');
   const isDarkMode = useColorScheme() === 'dark';
@@ -19,41 +26,56 @@ export default function NewPot({ navigation }: { navigation: any, route: any }) 
   };
 
   function createNewPot() {
-    if (!potService || !potName) { return; }
+    if (!potService || !potName) {
+      return;
+    }
 
     potService.create(potName, potDescription);
     navigation.goBack();
   }
 
-
-
-  return <SafeAreaView style={backgroundStyle}>
-    <StatusBar
-      translucent backgroundColor="transparent"
-      barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-    />
-    <View style={styles.view}>
-      <ThemedText>Los tarros son útiles para guardar semillas del mismo tipo.{'\n'}Aquí podrás crear un tarro para luego ir añadiéndole flores y semillas.{'\n'}¡Ponle nombre a tu tarro!</ThemedText>
-      <TextInput
-        style={styles.input}
-        placeholder="Añade un nombre"
-        onChange={e => setPotName(e.nativeEvent.text)}
-        value={potName}
+  return (
+    <SafeAreaView style={backgroundStyle}>
+      <StatusBar
+        translucent
+        backgroundColor="transparent"
+        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
       />
-      <TextInput
-        style={styles.input}
-        placeholder={'Descripción.\nEjemplo: Bomba de semillas para sembrar los jardines del Túria.'}
-        onChange={e => setPotDescription(e.nativeEvent.text)}
-        value={potDescription}
-        multiline={true}
-      />
-      <Button title="Crea tu tarro" action={() => { createNewPot(); setPotName(''); }} />
-    </View>
-  </SafeAreaView>;
+      <View style={styles.view}>
+        <ThemedText>
+          Los frascos son útiles para guardar semillas del mismo tipo.{'\n'}Aquí
+          podrás crear un frasco para luego ir añadiéndole flores y semillas.
+          {'\n'}¡Ponle nombre a tu frasco!
+        </ThemedText>
+        <TextInput
+          style={styles.input}
+          placeholder="Añade un nombre"
+          onChange={(e) => setPotName(e.nativeEvent.text)}
+          value={potName}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder={
+            'Descripción.\nEjemplo: Bomba de semillas para sembrar los jardines del Túria.'
+          }
+          onChange={(e) => setPotDescription(e.nativeEvent.text)}
+          value={potDescription}
+          multiline={true}
+        />
+        <Button
+          title="Crea tu frasco"
+          action={() => {
+            createNewPot();
+            setPotName('');
+          }}
+        />
+      </View>
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
-  view: { ...baseStyles.view, paddingBlockStart: 8 },
+  view: {...baseStyles.view, paddingBlockStart: 8},
   input: {
     borderWidth: 1,
     borderColor: Theme.dark.border,

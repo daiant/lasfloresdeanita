@@ -79,6 +79,9 @@ export class Binnacles {
 }
 
 const intl = new Intl.DateTimeFormat('es', {day: 'numeric', month: 'long'});
+export function formatFromDate(date: Date): string {
+  return intl.format(date);
+}
 export function format(date: string): string {
   return intl.format(dateFromUTC(date, '-'));
 }

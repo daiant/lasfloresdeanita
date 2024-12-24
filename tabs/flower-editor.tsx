@@ -12,7 +12,6 @@ import {Controller, ControllerRenderProps, useForm} from 'react-hook-form';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {Flower, FlowerRequest, Flowers} from '../lib/flowers';
 import {database} from '../lib/db-service';
-import DocumentPicker from 'react-native-document-picker';
 import {Pot, Pots} from '../lib/pots';
 import {useFocusEffect} from '@react-navigation/native';
 import RNPickerSelect from 'react-native-picker-select';
@@ -20,6 +19,7 @@ import {Theme} from '../components/styles/theme';
 import ThemedText from '../components/text';
 import Button from '../components/button';
 import IconWithAction from '../components/icon-with-action';
+import CameraComponent from '../components/camera';
 
 const flowerService = new Flowers(database);
 const potService = new Pots(database);
@@ -33,6 +33,7 @@ export default function FlowerEditor({
 }) {
   const [pots, setPots] = React.useState<Pot[]>([]);
   const [loading, setLoading] = React.useState(false);
+  const [cameraModal, setCameraModal] = React.useState(false);
   const [image, setImage] = React.useState(route.params?.flower?.image ?? '');
   const isDarkMode = useColorScheme() === 'dark';
 
@@ -93,6 +94,11 @@ export default function FlowerEditor({
     height: image ? 96 : 96,
   };
 
+  function updateImage(uri: string) {
+    setImage(uri);
+    setValue('image', uri);
+  }
+
   return (
     <View style={backgroundStyle}>
       <ScrollView style={styles.section}>
@@ -104,17 +110,13 @@ export default function FlowerEditor({
             image ? {uri: image} : require('../assets/flower-default.png')
           }
           text={'Subir foto de la flor'}
-          action={() => {
-            // TODO: Check if cache is better than document;
-            DocumentPicker.pickSingle({copyTo: 'cachesDirectory'})
-              .then((data) => {
-                setImage(data.fileCopyUri ?? '');
-                setValue('image', data.fileCopyUri ?? '');
-              })
-              .catch((e) => {
-                console.log(e);
-              });
-          }}
+          action={() => setCameraModal(true)}
+        />
+
+        <CameraComponent
+          open={cameraModal}
+          setOpen={setCameraModal}
+          setImage={updateImage}
         />
 
         <Controller
@@ -159,7 +161,7 @@ export default function FlowerEditor({
         />
         {errors.germination && <ThemedText>This is required.</ThemedText>}
 
-        <Text style={styles.label}>Tarro</Text>
+        <Text style={styles.label}>Frasco</Text>
         <Controller
           name="potId"
           control={control}
@@ -169,6 +171,7 @@ export default function FlowerEditor({
               items={pots.map((pot) => ({label: pot.name, value: pot.potId}))}
               value={field.value}
               onClose={field.onBlur}
+              placeholder={{label: 'Elige un frasco...'}}
             />
           )}
         />

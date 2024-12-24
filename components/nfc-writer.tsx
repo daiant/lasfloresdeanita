@@ -1,20 +1,30 @@
 /* eslint-disable react-native/no-inline-styles */
 import React from 'react';
-import { Image, Modal, StyleSheet, Text, ToastAndroid, TouchableOpacity, View } from 'react-native';
-import NfcManager, { Ndef, NfcTech } from 'react-native-nfc-manager';
-import { Theme } from './styles/theme';
+import {
+  Image,
+  Modal,
+  StyleSheet,
+  Text,
+  ToastAndroid,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import NfcManager, {Ndef, NfcTech} from 'react-native-nfc-manager';
+import {Theme} from './styles/theme';
 import Title from './title';
 import Button from './button';
 import ThemedText from './text';
-import { Pot, Pots } from '../lib/pots';
-import { database } from '../lib/db-service';
+import {Pot, Pots} from '../lib/pots';
+import {database} from '../lib/db-service';
 import RNPickerSelect from 'react-native-picker-select';
 
 const potService = new Pots(database);
 export default function NFCWriter() {
   const [modal, setModal] = React.useState(false);
   const [pots, setPots] = React.useState<Pot[]>([]);
-  const [selectedPot, setSelectedPot] = React.useState<Pot | undefined>(undefined);
+  const [selectedPot, setSelectedPot] = React.useState<Pot | undefined>(
+    undefined,
+  );
 
   React.useEffect(() => {
     setPots(potService.get());
@@ -28,16 +38,20 @@ export default function NFCWriter() {
 
   async function write() {
     console.log('me llamo???????????????????');
-    if (modal) { return; }
+    if (modal) {
+      return;
+    }
     if (!selectedPot) {
-      ToastAndroid.show('Elige primero un tarro.', ToastAndroid.BOTTOM);
+      ToastAndroid.show('Elige primero un frasco.', ToastAndroid.BOTTOM);
     }
 
     try {
       setModal(true);
       await NfcManager.requestTechnology(NfcTech.Ndef);
 
-      const bytes = Ndef.encodeMessage([Ndef.textRecord('pot:' + selectedPot!.potId)]);
+      const bytes = Ndef.encodeMessage([
+        Ndef.textRecord('pot:' + selectedPot!.potId),
+      ]);
 
       if (bytes) {
         await NfcManager.ndefHandler // STEP 2
@@ -63,17 +77,36 @@ export default function NFCWriter() {
       <Modal visible={modal} transparent={true} animationType="fade">
         <View style={styles.modal}>
           <Title tag="h2">Conjurando hechizos...</Title>
-          <ThemedText style={{ marginBlockStart: 8, marginInlineStart: 8, fontSize: 14 }}>Elige el tarro que quieres etiquetar</ThemedText>
+          <ThemedText
+            style={{marginBlockStart: 8, marginInlineStart: 8, fontSize: 14}}>
+            Elige el frasco que quieres etiquetar
+          </ThemedText>
           <RNPickerSelect
-            onValueChange={e => setSelectedPot(e)}
-            items={pots.map(pot => ({ label: pot.name, value: pot.potId }))}
+            onValueChange={(e) => setSelectedPot(e)}
+            items={pots.map((pot) => ({label: pot.name, value: pot.potId}))}
             value={selectedPot}
           />
-          <View style={{ opacity: 0.5, margin: 'auto', alignContent: 'center', justifyContent: 'center' }}>
-            <Image source={require('../assets/feather.png')} style={{ marginInline: 'auto' }} />
-            <ThemedText style={{ fontStyle: 'italic', textAlign: 'center', fontSize: 13 }}>Acerca el móvil a una etiqueta NFC</ThemedText>
+          <View
+            style={{
+              opacity: 0.5,
+              margin: 'auto',
+              alignContent: 'center',
+              justifyContent: 'center',
+            }}>
+            <Image
+              source={require('../assets/feather.png')}
+              style={{marginInline: 'auto'}}
+            />
+            <ThemedText
+              style={{fontStyle: 'italic', textAlign: 'center', fontSize: 13}}>
+              Acerca el móvil a una etiqueta NFC
+            </ThemedText>
           </View>
-          <Button action={cancel} title="Cancelar" style={{ marginBlockStart: 'auto', marginInlineStart: 'auto' }} />
+          <Button
+            action={cancel}
+            title="Cancelar"
+            style={{marginBlockStart: 'auto', marginInlineStart: 'auto'}}
+          />
         </View>
       </Modal>
     </View>

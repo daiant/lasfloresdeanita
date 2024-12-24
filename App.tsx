@@ -32,7 +32,7 @@ function App(): React.JSX.Element {
         <Stack.Screen
           name="New Pot"
           component={NewPot as any}
-          options={{...headerOptions, title: 'Nuevo Tarro'}}
+          options={{...headerOptions, title: 'Nuevo Frasco'}}
         />
         <Stack.Screen
           name="New Flower"

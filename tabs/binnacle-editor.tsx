@@ -1,18 +1,19 @@
 /* eslint-disable react-native/no-inline-styles */
 import {useFocusEffect} from '@react-navigation/native';
-import {Binnacle as BinnacleType, Binnacles, format} from '../lib/binnacle';
+import {
+  Binnacle as BinnacleType,
+  Binnacles,
+  format,
+  formatFromDate,
+} from '../lib/binnacle';
 import {database} from '../lib/db-service';
 import React from 'react';
 import {
   Image,
-  Modal,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
-  ToastAndroid,
   TouchableHighlight,
-  TouchableOpacity,
   View,
   useColorScheme,
 } from 'react-native';
@@ -20,9 +21,7 @@ import {Theme} from '../components/styles/theme';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import ThemedText from '../components/text';
 import Button from '../components/button';
-import {Camera, useCameraDevice} from 'react-native-vision-camera';
 import IconWithAction from '../components/icon-with-action';
-import {CameraRoll} from '@react-native-camera-roll/camera-roll';
 
 const binnacleService = new Binnacles(database);
 export default function BinnacleEditor({
@@ -102,6 +101,7 @@ export default function BinnacleEditor({
 }
 
 import EmojiPicker from 'rn-emoji-keyboard';
+import CameraComponent from '../components/camera';
 function Edit({navigation}: {navigation: any}) {
   const [modal, setModal] = React.useState(false);
 
@@ -113,7 +113,7 @@ function Edit({navigation}: {navigation: any}) {
 
   function submit() {
     binnacleService.create({
-      title,
+      title: title || formatFromDate(new Date()),
       emoji,
       description,
       image,
@@ -180,92 +180,4 @@ function Edit({navigation}: {navigation: any}) {
       />
     </ScrollView>
   );
-}
-
-function CameraComponent({
-  open,
-  setOpen,
-  setImage,
-}: {
-  open: boolean;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  setImage: React.Dispatch<React.SetStateAction<string>>;
-}) {
-  const [loading, setLoading] = React.useState(false);
-  const device = useCameraDevice('back');
-  const camera = React.useRef<Camera>(null);
-
-  React.useEffect(() => {
-    if (device) {
-      Camera.requestCameraPermission()
-        .then((result) => {
-          console.log('requestCameraPermission: ', result);
-        })
-        .catch((err) => {
-          console.log('requestCameraPermission Err: ', err);
-        });
-    }
-  }, [device]);
-
-  async function takePhoto() {
-    if (loading) {
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const file = await camera.current?.takePhoto();
-      if (!file) {
-        ToastAndroid.show('Fuck no', ToastAndroid.BOTTOM);
-        setLoading(false);
-        return;
-      }
-      const asset = await CameraRoll.saveAsset(`file://${file.path}`, {
-        type: 'photo',
-      });
-      console.log(asset.node.image.uri);
-      setImage(asset.node.image.uri);
-      setOpen(false);
-    } catch (e) {
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  if (device) {
-    return (
-      <Modal
-        animationType="slide"
-        onRequestClose={() => setOpen(false)}
-        visible={open}>
-        <Camera
-          style={StyleSheet.absoluteFill}
-          device={device}
-          isActive
-          photo
-          ref={camera}
-        />
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={takePhoto}
-          style={{
-            position: 'absolute',
-            display: 'flex',
-            bottom: 64,
-            right: 0,
-            left: 0,
-          }}>
-          <Text
-            style={{
-              margin: 'auto',
-              width: 64,
-              height: 64,
-              borderRadius: 64,
-              backgroundColor: Colors.white,
-            }}
-          />
-        </TouchableOpacity>
-      </Modal>
-    );
-  }
 }
