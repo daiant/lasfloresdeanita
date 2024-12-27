@@ -9,6 +9,7 @@ import {StyleSheet} from 'react-native';
 import {Theme} from './components/styles/theme';
 import Binnacle from './tabs/binnacle';
 import BinnacleEditor from './tabs/binnacle-editor';
+import FlowerDetail from './tabs/flower-detail';
 
 const Stack = createNativeStackNavigator();
 
@@ -42,6 +43,11 @@ function App(): React.JSX.Element {
         <Stack.Screen
           name="Edit Flower"
           component={FlowerEditor as any}
+          options={{...headerOptions, title: 'Floreta'}}
+        />
+        <Stack.Screen
+          name="Flower Detail"
+          component={FlowerDetail as any}
           options={{...headerOptions, title: 'Floreta'}}
         />
         <Stack.Screen

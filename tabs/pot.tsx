@@ -128,7 +128,7 @@ export default function Pot({navigation, route}: Props) {
                       : require('../assets/flower-default.png')
                   }
                   action={() =>
-                    navigation.navigate('Edit Flower', {
+                    navigation.navigate('Flower Detail', {
                       potId: item.potId,
                       flower: item,
                     })

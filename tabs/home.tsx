@@ -106,7 +106,7 @@ export default function Home({navigation}: {navigation: any}) {
                   : require('../assets/flower-default.png')
               }
               action={() =>
-                navigation.navigate('Edit Flower', {
+                navigation.navigate('Flower Detail', {
                   potId: item.potId,
                   flower: item,
                 })
