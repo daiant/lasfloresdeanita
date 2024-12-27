@@ -8,7 +8,6 @@
 
 import React from 'react';
 import {
-  Button,
   FlatList,
   ImageBackground,
   SafeAreaView,
@@ -28,8 +27,6 @@ import {Flower, Flowers} from '../lib/flowers';
 import Title from '../components/title';
 import {Theme} from '../components/styles/theme';
 import IconWithAction from '../components/icon-with-action';
-import NFCReader from '../components/nfc-reader';
-import NFCWriter from '../components/nfc-writer';
 import ThemedText from '../components/text';
 
 const potService = new Pots(database);

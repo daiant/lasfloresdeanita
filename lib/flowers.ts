@@ -100,6 +100,19 @@ export class Flowers {
     );
   }
 
+  static addPotToFlower(
+    db: NitroSQLiteConnection,
+    potId: number,
+    flowerId: Flower['flowerId'],
+  ) {
+    db.execute(
+      `
+     UPDATE ${tableName} SET ${table.potId} = ? WHERE ${table.id} = ? 
+      `,
+      [potId, flowerId],
+    );
+  }
+
   get(): Flower[] {
     const {rows} = this.db.execute<any>(
       `SELECT * FROM ${tableName} WHERE ${table.deletedAt} IS NULL ORDER BY ${table.id} DESC;`,

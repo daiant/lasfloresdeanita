@@ -36,7 +36,12 @@ export default function IconWithAction({
 }
 
 const styles = StyleSheet.create({
-  image: {width: 64, height: 64, marginBlock: 8, marginInline: 'auto'},
+  image: {
+    width: 64,
+    height: 64,
+    marginBlock: 8,
+    marginInline: 'auto',
+  },
   text: {
     color: Theme.dark.text,
     lineHeight: 18,

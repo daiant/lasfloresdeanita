@@ -1,10 +1,13 @@
+/* eslint-disable react-native/no-inline-styles */
 import React from 'react';
 import {
+  Image,
   KeyboardTypeOptions,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
+  TouchableHighlight,
   View,
   useColorScheme,
 } from 'react-native';
@@ -20,6 +23,7 @@ import ThemedText from '../components/text';
 import Button from '../components/button';
 import IconWithAction from '../components/icon-with-action';
 import CameraComponent from '../components/camera';
+import Title from '../components/title';
 
 const flowerService = new Flowers(database);
 const potService = new Pots(database);
@@ -31,6 +35,7 @@ export default function FlowerEditor({
   route: {params?: {flower: Flower | undefined; potId: number}};
   navigation: any;
 }) {
+  const [edit, setEdit] = React.useState(false);
   const [pots, setPots] = React.useState<Pot[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [cameraModal, setCameraModal] = React.useState(false);
@@ -102,114 +107,215 @@ export default function FlowerEditor({
   return (
     <View style={backgroundStyle}>
       <ScrollView style={styles.section}>
-        <IconWithAction
-          width={size.width}
-          height={size.height}
-          center
-          source={
-            image ? {uri: image} : require('../assets/flower-default.png')
-          }
-          text={'Subir foto de la flor'}
-          action={() => setCameraModal(true)}
-        />
-
-        <CameraComponent
-          open={cameraModal}
-          setOpen={setCameraModal}
-          setImage={updateImage}
-        />
-
-        <Controller
-          rules={{required: true}}
-          control={control}
-          render={({field}) => <Input field={field} placeholder="Nombre" />}
-          name="name"
-        />
-        {errors.name && <ThemedText>This is required.</ThemedText>}
-
-        <Controller
-          control={control}
-          render={({field}) => (
-            <Input field={field} placeholder="Nombre 100tifiko" />
-          )}
-          name="latinName"
-        />
-        {errors.latinName && <ThemedText>This is required.</ThemedText>}
-
-        <Controller
-          control={control}
-          render={({field}) => (
-            <Input field={field} placeholder="Descripción" />
-          )}
-          name="description"
-        />
-        {errors.description && <ThemedText>This is required.</ThemedText>}
-
-        <Controller
-          control={control}
-          render={({field}) => <Input field={field} placeholder="Floración" />}
-          name="floration"
-        />
-        {errors.floration && <ThemedText>This is required.</ThemedText>}
-
-        <Controller
-          control={control}
-          render={({field}) => (
-            <Input field={field} placeholder="Germinación" />
-          )}
-          name="germination"
-        />
-        {errors.germination && <ThemedText>This is required.</ThemedText>}
-
-        <Text style={styles.label}>Frasco</Text>
-        <Controller
-          name="potId"
-          control={control}
-          render={({field}) => (
-            <RNPickerSelect
-              onValueChange={(e) => field.onChange(e)}
-              items={pots.map((pot) => ({label: pot.name, value: pot.potId}))}
-              value={field.value}
-              onClose={field.onBlur}
-              placeholder={{label: 'Elige un frasco...'}}
+        {edit && (
+          <>
+            <IconWithAction
+              width={size.width}
+              height={size.height}
+              center
+              source={
+                image ? {uri: image} : require('../assets/flower-default.png')
+              }
+              text={'Subir foto de la flor'}
+              action={() => setCameraModal(true)}
             />
-          )}
-        />
 
-        <Controller
-          control={control}
-          render={({field}) => (
-            <Input
-              last
-              keyboard="number-pad"
-              field={field}
-              placeholder="Cantidad de semillas"
+            <CameraComponent
+              open={cameraModal}
+              setOpen={setCameraModal}
+              setImage={updateImage}
             />
-          )}
-          name="quantity"
-        />
-        {errors.germination && <ThemedText>This is required.</ThemedText>}
 
-        <Button
-          action={handleSubmit(onSubmit)}
-          title="Guardar floreta"
-          disabled={loading}
-        />
+            <Controller
+              rules={{required: true}}
+              control={control}
+              render={({field}) => <Input field={field} placeholder="Nombre" />}
+              name="name"
+            />
+            {errors.name && <ThemedText>This is required.</ThemedText>}
 
-        {route.params?.flower?.flowerId && (
-          <Button
-            title="Borrar floreta :("
-            variant="danger"
-            action={() => {
-              flowerService.delete(route.params?.flower?.flowerId);
-              navigation.goBack();
-            }}
+            <Controller
+              control={control}
+              render={({field}) => (
+                <Input field={field} placeholder="Nombre 100tifiko" />
+              )}
+              name="latinName"
+            />
+            {errors.latinName && <ThemedText>This is required.</ThemedText>}
+
+            <Controller
+              control={control}
+              render={({field}) => (
+                <Input field={field} placeholder="Descripción" />
+              )}
+              name="description"
+            />
+            {errors.description && <ThemedText>This is required.</ThemedText>}
+
+            <Controller
+              control={control}
+              render={({field}) => (
+                <Input field={field} placeholder="Floración" />
+              )}
+              name="floration"
+            />
+            {errors.floration && <ThemedText>This is required.</ThemedText>}
+
+            <Controller
+              control={control}
+              render={({field}) => (
+                <Input field={field} placeholder="Germinación" />
+              )}
+              name="germination"
+            />
+            {errors.germination && <ThemedText>This is required.</ThemedText>}
+
+            <Text style={styles.label}>Frasco</Text>
+            <Controller
+              name="potId"
+              control={control}
+              render={({field}) => (
+                <RNPickerSelect
+                  onValueChange={(e) => field.onChange(e)}
+                  items={pots.map((pot) => ({
+                    label: pot.name,
+                    value: pot.potId,
+                  }))}
+                  value={field.value}
+                  onClose={field.onBlur}
+                  placeholder={{label: 'Elige un frasco...'}}
+                />
+              )}
+            />
+
+            <Controller
+              control={control}
+              render={({field}) => (
+                <Input
+                  last
+                  keyboard="number-pad"
+                  field={field}
+                  placeholder="Cantidad de semillas"
+                />
+              )}
+              name="quantity"
+            />
+            {errors.germination && <ThemedText>This is required.</ThemedText>}
+
+            <Button
+              action={handleSubmit(onSubmit)}
+              title="Guardar floreta"
+              disabled={loading}
+            />
+
+            {route.params?.flower?.flowerId && (
+              // eslint-disable-next-line react-native/no-inline-styles
+              <View style={{marginBlockStart: 24}}>
+                <Title tag="h3">Zona peligrosa</Title>
+                <Button
+                  title="Borrar floreta :("
+                  variant="danger"
+                  action={() => {
+                    flowerService.delete(route.params?.flower?.flowerId);
+                    navigation.goBack();
+                  }}
+                />
+              </View>
+            )}
+          </>
+        )}
+        {!edit && (
+          <FlowerDetail
+            onEdit={() => setEdit(true)}
+            flower={route.params?.flower}
           />
         )}
       </ScrollView>
     </View>
   );
 }
+
+type FlowerDetailProps = {
+  onEdit: () => void;
+  flower: Flower | undefined;
+};
+
+function FlowerDetail({onEdit, flower}: FlowerDetailProps) {
+  if (!flower) {
+  } else {
+    return (
+      <>
+        <View
+          style={{
+            marginBlock: 16,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+          }}>
+          <ThemedText style={{flex: 1, fontSize: 18, fontWeight: 600}}>
+            {flower.name}
+          </ThemedText>
+          <TouchableHighlight onPress={onEdit}>
+            <Image
+              source={require('../assets/feather.png')}
+              style={{
+                width: 24,
+                height: 24,
+              }}
+            />
+          </TouchableHighlight>
+        </View>
+        <Image
+          source={{uri: flower.image}}
+          width={'100%' as never}
+          height={200}
+        />
+
+        <ThemedText style={detailStyles.label}>Nombre</ThemedText>
+        <View style={{flexDirection: 'row', gap: 8}}>
+          <ThemedText>{flower.name}</ThemedText>
+          <ThemedText style={detailStyles.italic}>
+            {flower.latinName}
+          </ThemedText>
+        </View>
+        {flower.description && <ThemedText>{flower.description}</ThemedText>}
+
+        <ThemedText style={detailStyles.label}>Floración</ThemedText>
+        {Boolean(flower.floration) && (
+          <ThemedText>{flower.floration}</ThemedText>
+        )}
+        {!flower.floration && (
+          <ThemedText style={detailStyles.italic}>
+            No hay información
+          </ThemedText>
+        )}
+
+        <ThemedText style={detailStyles.label}>Germinación</ThemedText>
+        {Boolean(flower.germination) && (
+          <ThemedText>{flower.germination}</ThemedText>
+        )}
+        {!flower.germination && (
+          <ThemedText style={detailStyles.italic}>
+            No hay información
+          </ThemedText>
+        )}
+
+        <ThemedText style={detailStyles.label}>Cantidad de semillas</ThemedText>
+        <ThemedText>{flower.quantity || 0}</ThemedText>
+      </>
+    );
+  }
+}
+const detailStyles = StyleSheet.create({
+  label: {
+    fontSize: 12,
+    marginBlockStart: 12,
+    marginBlockEnd: 0,
+  },
+  italic: {
+    fontSize: 15,
+    fontStyle: 'italic',
+  },
+});
 
 export function Input({
   placeholder,

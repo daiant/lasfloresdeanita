@@ -1,9 +1,27 @@
 import React from 'react';
-import { StyleSheet, Text } from 'react-native';
-import { Theme } from './styles/theme';
+import {StyleSheet, Text} from 'react-native';
+import {Theme} from './styles/theme';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
 
-export default function Title({ tag, children }: { children: React.ReactNode, tag: 'h1' | 'h2' | 'h3' }) {
-  return <Text style={styles[tag as keyof typeof styles]}>{children}</Text>;
+export default function Title({
+  tag,
+  children,
+  hideBorder,
+}: {
+  children: React.ReactNode;
+  tag: 'h1' | 'h2' | 'h3';
+  hideBorder?: boolean;
+}) {
+  return (
+    <Text
+      // eslint-disable-next-line react-native/no-inline-styles
+      style={{
+        ...styles[tag as keyof typeof styles],
+        borderBottomWidth: hideBorder ? 0 : 2,
+      }}>
+      {children}
+    </Text>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -14,6 +32,7 @@ const styles = StyleSheet.create({
     marginBlockStart: 24,
     marginBlockEnd: 8,
     textAlign: 'center',
+    borderBottomColor: 'transparent',
   },
   h2: {
     fontSize: 24,

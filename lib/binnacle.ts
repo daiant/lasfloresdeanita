@@ -20,12 +20,11 @@ export type Binnacle = {
   createdAt: Date;
   deletedAt?: Date;
 };
+type BinnacleData = Pick<Binnacle, 'title' | 'image' | 'description' | 'emoji'>;
 
 export class Binnacles {
   constructor(readonly db: NitroSQLiteConnection) {}
-  create(
-    binnacle: Pick<Binnacle, 'title' | 'image' | 'description' | 'emoji'>,
-  ) {
+  create(binnacle: BinnacleData) {
     return this.db.execute(
       `
     INSERT INTO ${tableName} (${table.title}, ${table.description}, ${table.image}, ${table.emoji}) VALUES (?, ?, ?, ?)
@@ -47,6 +46,22 @@ export class Binnacles {
       `SELECT * FROM ${tableName} WHERE ${table.deletedAt} IS NULL ORDER BY ${table.id} DESC;`,
     );
     return Array.from(rows?._array ?? []) as Binnacle[];
+  }
+
+  update(binnacleId: Binnacle['binnacleId'], data: BinnacleData) {
+    this.db.execute(
+      `
+      UPDATE 
+        ${tableName} 
+      SET 
+        ${table.title} = ?,
+        ${table.description} = ?,
+        ${table.image} = ?,
+        ${table.emoji} = ?
+      WHERE ${table.id} = ? 
+      `,
+      [data.title, data.description, data.image, data.emoji, binnacleId],
+    );
   }
 
   delete(binnacleId?: number | string) {

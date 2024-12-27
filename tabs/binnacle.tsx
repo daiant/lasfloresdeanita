@@ -44,45 +44,35 @@ export default function Binnacle({navigation}: {navigation: any}) {
         contentContainerStyle={{gap: 16, paddingBlock: 8}}
         renderItem={({item}) => {
           return (
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 8,
-                borderBottomColor: Theme.dark.border,
-                borderBottomWidth: 2,
-                paddingBlockEnd: 4,
+            <TouchableHighlight
+              onPress={() => {
+                navigation.navigate('Binnacle Detail', {id: item.binnacleId});
               }}>
-              <TouchableHighlight
-                onPress={() => {
-                  navigation.navigate('Binnacle Detail', {id: item.binnacleId});
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 8,
+                  borderBottomColor: Theme.dark.border,
+                  borderBottomWidth: 2,
+                  paddingBlockEnd: 4,
                 }}>
                 <Text style={{fontSize: 18}}>{item.emoji}</Text>
-              </TouchableHighlight>
-              <TouchableHighlight
-                onPress={() => {
-                  navigation.navigate('Binnacle Detail', {id: item.binnacleId});
-                }}>
                 <ThemedText style={{fontSize: 18, fontWeight: 600}}>
                   {item.title}
                 </ThemedText>
-              </TouchableHighlight>
-              <TouchableHighlight
-                style={{marginInlineStart: 'auto'}}
-                onPress={() => {
-                  navigation.navigate('Binnacle Detail', {id: item.binnacleId});
-                }}>
                 <Image
                   style={{
                     height: 16,
                     width: 16,
+                    marginInlineStart: 'auto',
                   }}
                   source={require('../assets/caret.png')}
                   height={32}
                   width={32}
                 />
-              </TouchableHighlight>
-            </View>
+              </View>
+            </TouchableHighlight>
           );
         }}
       />

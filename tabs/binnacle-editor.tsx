@@ -31,6 +31,7 @@ export default function BinnacleEditor({
   navigation: any;
   route: any;
 }) {
+  const [edit, setEdit] = React.useState(false);
   const [binnacle, setBinnacle] = React.useState<BinnacleType | undefined>(
     undefined,
   );
@@ -53,7 +54,7 @@ export default function BinnacleEditor({
 
   return (
     <View style={backgroundStyle}>
-      {binnacle && (
+      {binnacle && !edit && (
         <ScrollView>
           <>
             <View
@@ -67,9 +68,18 @@ export default function BinnacleEditor({
                 marginBlockEnd: 16,
               }}>
               <Text style={{flex: 0}}>{binnacle.emoji}</Text>
-              <ThemedText style={{fontSize: 18, fontWeight: 600}}>
+              <ThemedText style={{flex: 1, fontSize: 18, fontWeight: 600}}>
                 {binnacle.title}
               </ThemedText>
+              <TouchableHighlight onPress={() => setEdit((prev) => !prev)}>
+                <Image
+                  source={require('../assets/feather.png')}
+                  style={{
+                    width: 24,
+                    height: 24,
+                  }}
+                />
+              </TouchableHighlight>
             </View>
             <ThemedText style={{fontSize: 14, fontWeight: 400}}>
               {format(binnacle.createdAt as never)}
@@ -95,29 +105,45 @@ export default function BinnacleEditor({
           </>
         </ScrollView>
       )}
-      {!binnacle && <Edit navigation={navigation} />}
+      {(!binnacle || edit) && (
+        <Edit navigation={navigation} binnacle={binnacle} />
+      )}
     </View>
   );
 }
 
 import EmojiPicker from 'rn-emoji-keyboard';
 import CameraComponent from '../components/camera';
-function Edit({navigation}: {navigation: any}) {
+import Title from '../components/title';
+function Edit({
+  navigation,
+  binnacle,
+}: {
+  navigation: any;
+  binnacle: BinnacleType | undefined;
+}) {
   const [modal, setModal] = React.useState(false);
 
-  const [title, setTitle] = React.useState('');
+  const [title, setTitle] = React.useState(binnacle?.title ?? '');
   const [emojiKBOpen, setEmojiKBOpen] = React.useState<boolean>(false);
-  const [emoji, setEmoji] = React.useState('🌼');
-  const [description, setDescription] = React.useState('');
-  const [image, setImage] = React.useState('');
+  const [emoji, setEmoji] = React.useState(binnacle?.emoji ?? '🌼');
+  const [description, setDescription] = React.useState(
+    binnacle?.description ?? '',
+  );
+  const [image, setImage] = React.useState(binnacle?.image ?? '');
 
   function submit() {
-    binnacleService.create({
+    const data = {
       title: title || formatFromDate(new Date()),
       emoji,
       description,
       image,
-    });
+    };
+    if (binnacle?.binnacleId) {
+      binnacleService.update(binnacle.binnacleId, data);
+    } else {
+      binnacleService.create(data);
+    }
 
     navigation.goBack();
   }
@@ -178,6 +204,19 @@ function Edit({navigation}: {navigation: any}) {
         open={emojiKBOpen}
         onClose={() => setEmojiKBOpen(false)}
       />
+      {binnacle && (
+        <View style={{marginBlockStart: 24}}>
+          <Title tag="h3">Zona peligrosa</Title>
+          <Button
+            title="Borrar entrada"
+            variant="danger"
+            action={() => {
+              binnacleService.delete(binnacle.binnacleId);
+              navigation.goBack();
+            }}
+          />
+        </View>
+      )}
     </ScrollView>
   );
 }

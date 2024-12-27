@@ -24,10 +24,10 @@ function App(): React.JSX.Element {
         <Stack.Screen
           name="Pot"
           component={Pot as any}
-          options={({route}) => ({
+          options={{
             ...headerOptions,
-            title: (route.params as {name: string})?.name,
-          })}
+            title: 'Frasco',
+          }}
         />
         <Stack.Screen
           name="New Pot"
@@ -35,14 +35,14 @@ function App(): React.JSX.Element {
           options={{...headerOptions, title: 'Nuevo Frasco'}}
         />
         <Stack.Screen
-          name="New Flower"
+          name="Nueva flor"
           component={FlowerEditor as any}
           options={headerOptions}
         />
         <Stack.Screen
           name="Edit Flower"
           component={FlowerEditor as any}
-          options={headerOptions}
+          options={{...headerOptions, title: 'Floreta'}}
         />
         <Stack.Screen
           name="Binnacle"
