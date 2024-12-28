@@ -20,7 +20,7 @@ function App(): React.JSX.Element {
         <Stack.Screen
           name="Home"
           component={Home}
-          options={{headerShown: false}}
+          options={{headerShown: false, title: 'Las flores de Anita'}}
         />
         <Stack.Screen
           name="Pot"
@@ -38,7 +38,7 @@ function App(): React.JSX.Element {
         <Stack.Screen
           name="New Flower"
           component={FlowerEditor as any}
-          options={headerOptions}
+          options={{...headerOptions, title: 'Nueva Flor'}}
         />
         <Stack.Screen
           name="Edit Flower"
