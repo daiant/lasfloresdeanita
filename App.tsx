@@ -36,7 +36,7 @@ function App(): React.JSX.Element {
           options={{...headerOptions, title: 'Nuevo Frasco'}}
         />
         <Stack.Screen
-          name="Nueva flor"
+          name="New Flower"
           component={FlowerEditor as any}
           options={headerOptions}
         />

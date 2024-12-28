@@ -28,6 +28,7 @@ import Title from '../components/title';
 import {Theme} from '../components/styles/theme';
 import IconWithAction from '../components/icon-with-action';
 import ThemedText from '../components/text';
+import Button from '../components/button';
 
 const potService = new Pots(database);
 const flowerService = new Flowers(database);
@@ -107,8 +108,7 @@ export default function Home({navigation}: {navigation: any}) {
               }
               action={() =>
                 navigation.navigate('Flower Detail', {
-                  potId: item.potId,
-                  flower: item,
+                  flowerId: item.flowerId,
                 })
               }
               text={item.name}
@@ -129,16 +129,16 @@ export default function Home({navigation}: {navigation: any}) {
       <ThemedText style={{textAlign: 'center', marginBlock: 3, fontSize: 11}}>
         Lots of love, Charlo
       </ThemedText>
-      {/* <Button
+      <Button
         title="Hellfire"
-        onPress={() => {
+        action={() => {
           database.execute('DROP TABLE flowers');
           database.execute('DROP TABLE pots');
           database.execute('DROP TABLE binnacles');
           createTables(database);
           setPots(potService.get());
         }}
-      /> */}
+      />
     </SafeAreaView>
   );
 }

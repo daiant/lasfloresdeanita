@@ -6,26 +6,41 @@ import {
   StyleSheet,
   ScrollView,
   useColorScheme,
+  FlatList,
 } from 'react-native';
 import ThemedText from '../components/text';
-import {Flower} from '../lib/flowers';
+import {Flower, Flowers} from '../lib/flowers';
 import React from 'react';
 import {Theme} from '../components/styles/theme';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
+import {database} from '../lib/db-service';
+import {Pots} from '../lib/pots';
+import IconWithAction from '../components/icon-with-action';
+import {useFocusEffect} from '@react-navigation/native';
 
 type FlowerDetailProps = {
-  route: {params?: {flower: Flower | undefined; potId: number}};
+  route: {params?: {flowerId: number | undefined}};
   navigation: any;
 };
 
+const potService = new Pots(database);
+const flowerService = new Flowers(database);
 export default function FlowerDetail({route, navigation}: FlowerDetailProps) {
-  const flower = route.params?.flower;
+  const [flower, setFlower] = React.useState<Flower | undefined>(undefined);
   const isDarkMode = useColorScheme() === 'dark';
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Theme.dark.base : Colors.lighter,
     flex: 1,
   };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log('ima callin');
+      setFlower(flowerService.getById(route.params?.flowerId));
+    }, [route.params]),
+  );
+
   if (!flower) {
   } else {
     return (
@@ -43,8 +58,7 @@ export default function FlowerDetail({route, navigation}: FlowerDetailProps) {
             <TouchableHighlight
               onPress={() =>
                 navigation.navigate('Edit Flower', {
-                  potId: route.params?.potId,
-                  flower: flower,
+                  flowerId: flower.flowerId,
                 })
               }>
               <Image
@@ -56,12 +70,13 @@ export default function FlowerDetail({route, navigation}: FlowerDetailProps) {
               />
             </TouchableHighlight>
           </View>
-          <Image
-            source={{uri: flower.image}}
-            width={'100%' as never}
-            height={200}
-          />
-
+          {flower.image && (
+            <Image
+              source={{uri: flower.image}}
+              width={'100%' as never}
+              height={200}
+            />
+          )}
           <ThemedText style={detailStyles.label}>Nombre</ThemedText>
           <View style={{flexDirection: 'row', gap: 8}}>
             <ThemedText>{flower.name}</ThemedText>
@@ -69,7 +84,12 @@ export default function FlowerDetail({route, navigation}: FlowerDetailProps) {
               {flower.latinName}
             </ThemedText>
           </View>
-          {flower.description && <ThemedText>{flower.description}</ThemedText>}
+          {flower.description && (
+            <>
+              <ThemedText style={detailStyles.label}>Descripción</ThemedText>
+              <ThemedText>{flower.description}</ThemedText>
+            </>
+          )}
 
           <ThemedText style={detailStyles.label}>Floración</ThemedText>
           {Boolean(flower.floration) && (
@@ -95,7 +115,30 @@ export default function FlowerDetail({route, navigation}: FlowerDetailProps) {
             Cantidad de semillas
           </ThemedText>
           <ThemedText>{flower.quantity || 0}</ThemedText>
-        </ScrollView>{' '}
+
+          <ThemedText style={detailStyles.label}>Frascos</ThemedText>
+          <FlatList
+            horizontal
+            data={potService.getByFlowerId(flower.flowerId)}
+            contentContainerStyle={{gap: 8}}
+            ListEmptyComponent={
+              <ThemedText style={{fontSize: 13, fontStyle: 'italic'}}>
+                En ningún frasco
+              </ThemedText>
+            }
+            renderItem={({item}) => (
+              <View>
+                <IconWithAction
+                  text={item.name}
+                  action={() => {
+                    navigation.navigate('Pot', {potId: item.potId});
+                  }}
+                  source={require('../assets/bottle.png')}
+                />
+              </View>
+            )}
+          />
+        </ScrollView>
       </View>
     );
   }

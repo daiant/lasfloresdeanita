@@ -129,8 +129,7 @@ export default function Pot({navigation, route}: Props) {
                   }
                   action={() =>
                     navigation.navigate('Flower Detail', {
-                      potId: item.potId,
-                      flower: item,
+                      flowerId: item.flowerId,
                     })
                   }
                   text={item.name}

@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {NitroSQLiteConnection} from 'react-native-nitro-sqlite';
+import {Pot} from './pots';
+import {ToastAndroid} from 'react-native';
 const tableName = 'flowers';
 const table = {
   id: 'flowerId',
-  potId: 'potId',
   name: 'name',
   latinName: 'latinName',
   description: 'description',
@@ -15,7 +17,7 @@ const table = {
 
 export type Flower = {
   flowerId: number;
-  potId: number;
+  pots: Pot[];
   name: string;
   latinName: string;
   description?: string;
@@ -28,7 +30,7 @@ export type Flower = {
 
 export type FlowerRequest = {
   flowerId: number | undefined;
-  potId: number | undefined;
+  pots: Pot[];
   name: string;
   latinName: string;
   description?: string;
@@ -40,11 +42,57 @@ export type FlowerRequest = {
 
 export class Flowers {
   constructor(readonly db: NitroSQLiteConnection) {}
-  create(flower: FlowerRequest) {
-    return this.db.execute(
-      `
+
+  async create(flower: FlowerRequest) {
+    await this.db.transaction((tx) => {
+      const {rows} = tx.execute(
+        `
     INSERT INTO ${tableName} (
-      ${table.potId},
+      ${table.name},
+      ${table.latinName},
+      ${table.description},
+      ${table.floration},
+      ${table.germination},
+      ${table.quantity},
+      ${table.image}
+    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+    RETURNING ${table.id}
+  `,
+        [
+          flower.name,
+          flower.latinName,
+          flower.description,
+          flower.floration,
+          flower.germination,
+          flower.quantity,
+          flower.image,
+        ],
+      );
+      const id = rows?.item(0)?.flowerId;
+      if (!id) {
+        tx.rollback();
+        ToastAndroid.show('Algo malo ha pasao :(', ToastAndroid.BOTTOM);
+        return;
+      }
+      flower.pots.forEach(({potId}) => {
+        tx.execute('INSERT INTO pot_flowers (flowerId, potId) VALUES (?, ?)', [
+          id,
+          potId,
+        ]);
+      });
+      tx.commit();
+    });
+  }
+
+  async update(flower: FlowerRequest) {
+    if (!flower.flowerId) {
+      return;
+    }
+    await this.db.transaction((tx) => {
+      tx.execute(
+        `
+    REPLACE INTO ${tableName} (
+      ${table.id},
       ${table.name},
       ${table.latinName},
       ${table.description},
@@ -54,50 +102,31 @@ export class Flowers {
       ${table.image}
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `,
-      [
-        flower.potId,
-        flower.name,
-        flower.latinName,
-        flower.description,
-        flower.floration,
-        flower.germination,
-        flower.quantity,
-        flower.image,
-      ],
-    );
-  }
+        [
+          flower.flowerId,
+          flower.name,
+          flower.latinName,
+          flower.description,
+          flower.floration,
+          flower.germination,
+          flower.quantity,
+          flower.image,
+        ],
+      );
 
-  update(flower: FlowerRequest) {
-    if (!flower.flowerId) {
-      return;
-    }
-
-    return this.db.execute(
-      `
-    REPLACE INTO ${tableName} (
-      ${table.id},
-      ${table.potId},
-      ${table.name},
-      ${table.latinName},
-      ${table.description},
-      ${table.floration},
-      ${table.germination},
-      ${table.quantity},
-      ${table.image}
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `,
-      [
+      tx.execute('DELETE FROM pot_flowers WHERE flowerId = ?', [
         flower.flowerId,
-        flower.potId,
-        flower.name,
-        flower.latinName,
-        flower.description,
-        flower.floration,
-        flower.germination,
-        flower.quantity,
-        flower.image,
-      ],
-    );
+      ]);
+
+      flower.pots.forEach(({potId}) =>
+        tx.execute('INSERT INTO pot_flowers (flowerId, potId) VALUES (?, ?)', [
+          flower.flowerId,
+          potId,
+        ]),
+      );
+
+      tx.commit();
+    });
   }
 
   static addPotToFlower(
@@ -105,12 +134,12 @@ export class Flowers {
     potId: number,
     flowerId: Flower['flowerId'],
   ) {
-    db.execute(
-      `
-     UPDATE ${tableName} SET ${table.potId} = ? WHERE ${table.id} = ? 
-      `,
-      [potId, flowerId],
-    );
+    // db.execute(
+    //   `
+    //  UPDATE ${tableName} SET ${table.potId} = ? WHERE ${table.id} = ?
+    //   `,
+    //   [potId, flowerId],
+    // );
   }
 
   get(): Flower[] {
@@ -121,13 +150,26 @@ export class Flowers {
     return Array.from(rows?._array ?? []) as Flower[];
   }
 
+  getById(flowerId?: Flower['flowerId']): Flower | undefined {
+    if (!flowerId) {
+      return undefined;
+    }
+
+    const {rows} = this.db.execute<any>(
+      `SELECT * FROM ${tableName} WHERE ${table.deletedAt} IS NULL AND ${table.id} = ?;`,
+      [flowerId],
+    );
+    return rows?._array?.at(0);
+  }
+
   getByPotId(potId: string): Flower[] {
     const {rows} = this.db.execute<any>(
       `SELECT *
-        FROM ${tableName} 
+        FROM ${tableName} f
+        LEFT JOIN pot_flowers pf ON pf.flowerId = f.${table.id} 
         WHERE 
+          pf.potId = ? AND
           ${table.deletedAt} IS NULL 
-        AND ${table.potId} = ?
         ORDER BY ${table.id} DESC;`,
       [potId],
     );
@@ -148,7 +190,6 @@ export class Flowers {
   static createTable = async (db: NitroSQLiteConnection) => {
     const query = `CREATE TABLE IF NOT EXISTS ${tableName} (
     ${table.id} INTEGER PRIMARY KEY,
-    ${table.potId} INTEGER,
     ${table.name} TEXT NOT NULL,
     ${table.latinName} TEXT,
     ${table.description} TEXT,

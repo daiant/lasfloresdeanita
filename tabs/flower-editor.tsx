@@ -1,7 +1,9 @@
 /* eslint-disable react-native/no-inline-styles */
 import React from 'react';
 import {
+  FlatList,
   KeyboardTypeOptions,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -15,7 +17,6 @@ import {Flower, FlowerRequest, Flowers} from '../lib/flowers';
 import {database} from '../lib/db-service';
 import {Pot, Pots} from '../lib/pots';
 import {useFocusEffect} from '@react-navigation/native';
-import RNPickerSelect from 'react-native-picker-select';
 import {Theme} from '../components/styles/theme';
 import ThemedText from '../components/text';
 import Button from '../components/button';
@@ -29,13 +30,18 @@ export default function FlowerEditor({
   route,
   navigation,
 }: {
-  route: {params?: {flower: Flower | undefined; potId: number}};
+  route: {params?: {flowerId: number | undefined; potId: number}};
   navigation: any;
 }) {
+  const [flower, setFlower] = React.useState<Flower | undefined>(undefined);
   const [pots, setPots] = React.useState<Pot[]>([]);
+  const [isPotModal, setIsPotModal] = React.useState(false);
+  const [selectedPots, setSelectedPots] = React.useState<Pot[]>(
+    potService.getByFlowerId(flower?.flowerId),
+  );
   const [loading, setLoading] = React.useState(false);
   const [cameraModal, setCameraModal] = React.useState(false);
-  const [image, setImage] = React.useState(route.params?.flower?.image ?? '');
+  const [image, setImage] = React.useState(flower?.image ?? '');
   const isDarkMode = useColorScheme() === 'dark';
 
   const backgroundStyle = {
@@ -47,20 +53,43 @@ export default function FlowerEditor({
     control,
     handleSubmit,
     setValue,
+    reset,
     formState: {errors},
   } = useForm({
     defaultValues: {
-      flowerId: route.params?.flower?.flowerId,
-      name: route.params?.flower?.name ?? '',
-      latinName: route.params?.flower?.latinName ?? '',
-      description: route.params?.flower?.description ?? '',
-      floration: route.params?.flower?.floration ?? '',
-      germination: route.params?.flower?.germination ?? '',
-      potId: route.params?.flower?.potId ?? route.params?.potId,
-      image: route.params?.flower?.image ?? '',
-      quantity: route.params?.flower?.quantity ?? 0,
+      flowerId: flower?.flowerId,
+      pots: selectedPots,
+      name: flower?.name ?? '',
+      latinName: flower?.latinName ?? '',
+      description: flower?.description ?? '',
+      floration: flower?.floration ?? '',
+      germination: flower?.germination ?? '',
+      image: flower?.image ?? '',
+      quantity: flower?.quantity ?? 0,
     },
   });
+
+  useFocusEffect(
+    React.useCallback(() => {
+      setPots(potService.get());
+      setFlower(flowerService.getById(route.params?.flowerId));
+    }, [route.params]),
+  );
+
+  React.useEffect(() => {
+    reset({
+      flowerId: flower?.flowerId,
+      pots: selectedPots,
+      name: flower?.name ?? '',
+      latinName: flower?.latinName ?? '',
+      description: flower?.description ?? '',
+      floration: flower?.floration ?? '',
+      germination: flower?.germination ?? '',
+      image: flower?.image ?? '',
+      quantity: flower?.quantity ?? 0,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flower, reset]);
 
   const onSubmit = async (flower: FlowerRequest) => {
     if (loading) {
@@ -73,9 +102,9 @@ export default function FlowerEditor({
     setLoading(true);
     try {
       if (flower.flowerId) {
-        flowerService.update(flower);
+        await flowerService.update({...flower, pots: selectedPots});
       } else {
-        flowerService.create(flower);
+        await flowerService.create({...flower, pots: selectedPots});
       }
     } catch (error) {
       console.log(error);
@@ -83,12 +112,6 @@ export default function FlowerEditor({
     setLoading(false);
     navigation.goBack();
   };
-
-  useFocusEffect(
-    React.useCallback(() => {
-      setPots(potService.get());
-    }, []),
-  );
 
   const size = {
     width: image ? 330 : 200,
@@ -163,21 +186,58 @@ export default function FlowerEditor({
         {errors.germination && <ThemedText>This is required.</ThemedText>}
 
         <Text style={styles.label}>Frasco</Text>
-        <Controller
-          name="potId"
-          control={control}
-          render={({field}) => (
-            <RNPickerSelect
-              onValueChange={(e) => field.onChange(e)}
-              items={pots.map((pot) => ({
-                label: pot.name,
-                value: pot.potId,
-              }))}
-              value={field.value}
-              onClose={field.onBlur}
-              placeholder={{label: 'Elige un frasco...'}}
-            />
+        <FlatList
+          horizontal
+          data={selectedPots}
+          contentContainerStyle={{gap: 8}}
+          renderItem={({item}) => (
+            <View>
+              <IconWithAction
+                text={item.name}
+                action={() => {
+                  navigation.navigate('Pot', {potId: item.potId});
+                }}
+                source={require('../assets/bottle.png')}
+              />
+              <Button
+                variant="secondary"
+                title="Borrar"
+                action={() =>
+                  setSelectedPots((prev) =>
+                    prev.filter((p) => p.potId !== item.potId),
+                  )
+                }
+              />
+            </View>
           )}
+          ListFooterComponent={
+            <IconWithAction
+              center={!pots.length}
+              source={require('../assets/zodiac.png')}
+              text="Añade un frasco"
+              action={() => setIsPotModal(true)}
+            />
+          }
+        />
+        <PotModal
+          pots={pots.filter(
+            (p) => !selectedPots.find((sp) => sp.potId === p.potId),
+          )}
+          isOpen={isPotModal}
+          setIsOpen={setIsPotModal}
+          onPot={(pot) => {
+            setSelectedPots((prev) => {
+              const item = pots.find((p) => p.potId === pot);
+              if (prev.find((p) => p.potId === pot)) {
+                return prev;
+              }
+              if (!item) {
+                return prev;
+              }
+              return prev.concat(item);
+            });
+            setIsPotModal(false);
+          }}
         />
 
         <Controller
@@ -200,21 +260,71 @@ export default function FlowerEditor({
           disabled={loading}
         />
 
-        {route.params?.flower?.flowerId && (
+        {flower?.flowerId && (
           <View style={{marginBlockStart: 24}}>
             <Title tag="h3">Zona peligrosa</Title>
             <Button
               title="Borrar floreta :("
               variant="danger"
               action={() => {
-                flowerService.delete(route.params?.flower?.flowerId);
-                navigation.goBack();
+                flowerService.delete(flower?.flowerId);
+                navigation.navigate('Home');
               }}
             />
           </View>
         )}
       </ScrollView>
     </View>
+  );
+}
+
+type PotModalProps = {
+  pots: Pot[];
+  isOpen: boolean;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  onPot: (potId: Pot['potId']) => void;
+};
+export function PotModal({pots, isOpen, setIsOpen, onPot}: PotModalProps) {
+  return (
+    <Modal
+      animationType="slide"
+      visible={isOpen}
+      onRequestClose={() => setIsOpen(false)}
+      transparent={true}>
+      <View
+        style={{
+          backgroundColor: Theme.dark.overlay,
+          flex: 1,
+          marginInline: 16,
+          marginBlock: 32,
+          borderColor: Theme.dark.border,
+          borderWidth: 2,
+          padding: 8,
+          borderRadius: 4,
+        }}>
+        <View style={{marginBlock: 8}}>
+          <Title tag="h2">Selecciona un frasco</Title>
+        </View>
+        <FlatList
+          numColumns={4}
+          data={pots}
+          columnWrapperStyle={{gap: 8}}
+          contentContainerStyle={{gap: 8}}
+          ListEmptyComponent={
+            <ThemedText style={{fontSize: 13, fontStyle: 'italic'}}>
+              No hay frascos disponibles
+            </ThemedText>
+          }
+          renderItem={({item}) => (
+            <IconWithAction
+              text={item.name}
+              action={() => onPot(item.potId)}
+              source={require('../assets/bottle.png')}
+            />
+          )}
+        />
+      </View>
+    </Modal>
   );
 }
 

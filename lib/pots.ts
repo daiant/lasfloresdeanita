@@ -1,5 +1,5 @@
 import {NitroSQLiteConnection} from 'react-native-nitro-sqlite';
-import {Flowers} from './flowers';
+import {Flower, Flowers} from './flowers';
 
 const tableName = 'pots';
 const table = {
@@ -38,6 +38,21 @@ export class Pots {
   get(): Pot[] {
     const {rows} = this.db.execute<any>(
       `SELECT * FROM ${tableName} WHERE ${table.deletedAt} IS NULL ORDER BY ${table.id} DESC;`,
+    );
+    return Array.from(rows?._array ?? []) as Pot[];
+  }
+
+  getByFlowerId(flowerId?: Flower['flowerId']): Pot[] {
+    if (!flowerId) {
+      return [];
+    }
+    const {rows} = this.db.execute<any>(
+      `SELECT * FROM ${tableName} p 
+      LEFT JOIN pot_flowers pf ON p.potId = pf.potId
+      WHERE 
+      pf.flowerId = ? AND
+      ${table.deletedAt} IS NULL ORDER BY ${table.id} DESC;`,
+      [flowerId],
     );
     return Array.from(rows?._array ?? []) as Pot[];
   }
