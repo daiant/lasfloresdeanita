@@ -1,7 +1,16 @@
+/* eslint-disable react-native/no-inline-styles */
 import React from 'react';
-import { Image, Modal, StyleSheet, Text, ToastAndroid, TouchableOpacity, View } from 'react-native';
-import NfcManager, { Ndef, NfcTech } from 'react-native-nfc-manager';
-import { Theme } from './styles/theme';
+import {
+  Image,
+  Modal,
+  StyleSheet,
+  Text,
+  ToastAndroid,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import NfcManager, {Ndef, NfcTech} from 'react-native-nfc-manager';
+import {Theme} from './styles/theme';
 import Title from './title';
 import Button from './button';
 import ThemedText from './text';
@@ -14,7 +23,9 @@ export default function NFCReader() {
     setModal(false);
   }
   async function read() {
-    if (modal) { return; }
+    if (modal) {
+      return;
+    }
     try {
       setModal(true);
       // register for the NFC tag with NDEF in it
@@ -22,9 +33,14 @@ export default function NFCReader() {
       // the resolved tag object will contain `ndefMessage` property
       const tag = await NfcManager.getTag();
       if (tag?.ndefMessage.at(0)?.payload?.length) {
-        console.log(tag.ndefMessage.map(msg => Ndef.decodeMessage(msg.payload)));
+        console.log(
+          tag.ndefMessage.map((msg) => Ndef.decodeMessage(msg.payload)),
+        );
       } else {
-        ToastAndroid.show('No hay hechizos en este pergamino', ToastAndroid.BOTTOM);
+        ToastAndroid.show(
+          'No hay hechizos en este pergamino',
+          ToastAndroid.BOTTOM,
+        );
       }
     } catch (ex) {
       console.warn(ex);
@@ -45,11 +61,27 @@ export default function NFCReader() {
       <Modal visible={modal} transparent={true} animationType="fade">
         <View style={styles.modal}>
           <Title tag="h2">Leyendo lo arcano...</Title>
-          <View style={{ opacity: 0.5, margin: 'auto', alignContent: 'center', justifyContent: 'center' }}>
-            <Image source={require('../assets/read.png')} style={{ marginInline: 'auto' }} />
-            <ThemedText style={{ fontStyle: 'italic', textAlign: 'center', fontSize: 13 }}>Acerca el móvil a una etiqueta NFC</ThemedText>
+          <View
+            style={{
+              opacity: 0.5,
+              margin: 'auto',
+              alignContent: 'center',
+              justifyContent: 'center',
+            }}>
+            <Image
+              source={require('../assets/read.png')}
+              style={{marginInline: 'auto'}}
+            />
+            <ThemedText
+              style={{fontStyle: 'italic', textAlign: 'center', fontSize: 13}}>
+              Acerca el móvil a una etiqueta NFC
+            </ThemedText>
           </View>
-          <Button action={cancel} title="Cancelar" style={{ marginBlockStart: 'auto', marginInlineStart: 'auto' }} />
+          <Button
+            action={cancel}
+            title="Cancelar"
+            style={{marginBlockStart: 'auto', marginInlineStart: 'auto'}}
+          />
         </View>
       </Modal>
     </View>

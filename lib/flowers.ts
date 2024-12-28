@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {NitroSQLiteConnection} from 'react-native-nitro-sqlite';
 import {Pot} from './pots';
 import {ToastAndroid} from 'react-native';

@@ -28,7 +28,6 @@ import Title from '../components/title';
 import {Theme} from '../components/styles/theme';
 import IconWithAction from '../components/icon-with-action';
 import ThemedText from '../components/text';
-import Button from '../components/button';
 
 const potService = new Pots(database);
 const flowerService = new Flowers(database);
@@ -129,7 +128,7 @@ export default function Home({navigation}: {navigation: any}) {
       <ThemedText style={{textAlign: 'center', marginBlock: 3, fontSize: 11}}>
         Lots of love, Charlo
       </ThemedText>
-      <Button
+      {/* <Button
         title="Hellfire"
         action={() => {
           database.execute('DROP TABLE flowers');
@@ -138,7 +137,7 @@ export default function Home({navigation}: {navigation: any}) {
           createTables(database);
           setPots(potService.get());
         }}
-      />
+      /> */}
     </SafeAreaView>
   );
 }
