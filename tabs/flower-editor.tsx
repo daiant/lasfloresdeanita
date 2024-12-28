@@ -91,7 +91,7 @@ export default function FlowerEditor({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [flower, reset]);
 
-  const onSubmit = async (flower: FlowerRequest) => {
+  const onSubmit = async (flowerRequest: FlowerRequest) => {
     if (loading) {
       return;
     }
@@ -101,10 +101,10 @@ export default function FlowerEditor({
 
     setLoading(true);
     try {
-      if (flower.flowerId) {
-        await flowerService.update({...flower, pots: selectedPots});
+      if (flowerRequest.flowerId) {
+        await flowerService.update({...flowerRequest, pots: selectedPots});
       } else {
-        await flowerService.create({...flower, pots: selectedPots});
+        await flowerService.create({...flowerRequest, pots: selectedPots});
       }
     } catch (error) {
       console.log(error);
