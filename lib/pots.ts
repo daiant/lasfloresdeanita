@@ -1,5 +1,6 @@
 import {NitroSQLiteConnection} from 'react-native-nitro-sqlite';
-import {Flower, Flowers} from './flowers';
+import {Flower} from './flowers';
+import {PotFlowers} from './pot-flowers';
 
 const tableName = 'pots';
 const table = {
@@ -67,7 +68,11 @@ export class Pots {
   }
 
   addFlower(potId: number, flowerId: number) {
-    Flowers.addPotToFlower(this.db, potId, flowerId);
+    PotFlowers.addPotToFlower(this.db, potId, flowerId);
+  }
+
+  deleteFlower(potId: number, flowerId: number) {
+    PotFlowers.delete(this.db, potId, flowerId);
   }
 
   delete(potId?: number | string) {

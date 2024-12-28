@@ -121,19 +121,30 @@ export default function Pot({navigation, route}: Props) {
                 />
               }
               renderItem={({item}) => (
-                <IconWithAction
-                  source={
-                    item.image
-                      ? {uri: item.image}
-                      : require('../assets/flower-default.png')
-                  }
-                  action={() =>
-                    navigation.navigate('Flower Detail', {
-                      flowerId: item.flowerId,
-                    })
-                  }
-                  text={item.name}
-                />
+                <View>
+                  <IconWithAction
+                    source={
+                      item.image
+                        ? {uri: item.image}
+                        : require('../assets/flower-default.png')
+                    }
+                    action={() =>
+                      navigation.navigate('Flower Detail', {
+                        flowerId: item.flowerId,
+                      })
+                    }
+                    text={item.name}
+                  />
+
+                  <Button
+                    variant="secondary"
+                    title="Borrar"
+                    action={() => {
+                      potService.deleteFlower(pot.potId, item.flowerId);
+                      setFlowers(flowerService.getByPotId(route.params.potId));
+                    }}
+                  />
+                </View>
               )}
             />
             <View style={styles.section}>
@@ -149,7 +160,12 @@ export default function Pot({navigation, route}: Props) {
             </View>
           </View>
           <FlowerModal
-            flowers={flowers}
+            flowers={flowerService
+              .get()
+              .filter(
+                (flower) =>
+                  !flowers.find((f) => f.flowerId === flower.flowerId),
+              )}
             isOpen={flowerModal}
             setIsOpen={setFlowerModal}
             navigation={navigation}
